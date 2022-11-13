@@ -121,12 +121,10 @@ docker rmi ${IMAGE}:${VERSION}
 ```shell
 # 新增 Helm Chart
 helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
-# 创建命名空间
-kubectl create namespace provisioner-system
 # 安装 nfs-subdir-external-provisioner
 helm install nfs-subdir-external-provisioner \
   -f nfs-subdir-external-provisioner-values.yaml \
-  -n provisioner-system \
+  -n kube-system \
   nfs-subdir-external-provisioner/nfs-subdir-external-provisioner
 ```
 
