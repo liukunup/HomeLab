@@ -1,0 +1,46 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notebook
+  labels:
+    app: notebook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notebook
+  template:
+    metadata:
+      labels:
+        app: notebook
+    spec:
+      containers:
+        - name: notebook
+          image: jupyter/minimal-notebook:notebook-6.5.1
+          command: ["start-notebook.sh"]
+          args:
+            - --NotebookApp.password='sha1:a7c0702d28e9:8a8868c5d4ea33af70e04c634487402b3997f40c'
+          ports:
+            - containerPort: 8888
+              name: webui
+              protocol: TCP
+          env:
+            - name: DOCKER_STACKS_JUPYTER_CMD
+              value: 'lab'
+            - name: GRANT_SUDO
+              value: 'yes'
+          resources:
+            requests:
+              cpu: 250m
+              memory: 750Mi
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+          volumeMounts:
+            - mountPath: /home/jovyan/work
+              name: data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: notebook

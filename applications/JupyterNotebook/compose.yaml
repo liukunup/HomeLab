@@ -1,0 +1,30 @@
+version: "3"
+
+networks:
+  notebook:
+    driver: bridge
+
+volumes:
+  notebook:
+
+services:
+
+  notebook:
+    image: jupyter/minimal-notebook:notebook-6.5.1
+    container_name: minimal-notebook
+    hostname: minimal-notebook
+    command: start-notebook.sh --NotebookApp.password=${JUPYTER_NOTEBOOK_PASSWORD:?error}
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+      - LANG=en_US.UTF-8
+      - PUID=1000
+      - PGID=1000
+      - DOCKER_STACKS_JUPYTER_CMD=lab
+      - GRANT_SUDO=yes
+    volumes:
+      - notebook:/home/jovyan/work
+    ports:
+      - "8888:8888"
+    networks:
+      - notebook
