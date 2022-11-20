@@ -18,6 +18,7 @@ spec:
       containers:
         - name: notebook
           image: jupyter/minimal-notebook:notebook-6.5.1
+          imagePullPolicy: IfNotPresent
           command: ["start-notebook.sh"]
           args:
             - --NotebookApp.password='sha1:a7c0702d28e9:8a8868c5d4ea33af70e04c634487402b3997f40c'
