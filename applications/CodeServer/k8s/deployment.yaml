@@ -49,4 +49,4 @@ spec:
       volumes:
         - name: config
           persistentVolumeClaim:
-            claimName: code-server-config
+            claimName: vscode-config
