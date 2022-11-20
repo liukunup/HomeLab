@@ -1,0 +1,72 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jellyfin
+  labels:
+    app: jellyfin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jellyfin
+  template:
+    metadata:
+      labels:
+        app: jellyfin
+    spec:
+      containers:
+        - name: jellyfin
+          image: docker.io/jellyfin/jellyfin:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8096
+              name: http
+              protocol: TCP
+            - containerPort: 8920
+              name: https
+              protocol: TCP
+            - containerPort: 1900
+              name: s-discovery
+              protocol: UDP
+            - containerPort: 7359
+              name: c-discovery
+              protocol: UDP
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+          resources:
+            requests:
+              cpu: 250m
+              memory: 750Mi
+            limits:
+              cpu: 2000m
+              memory: 4Gi
+          volumeMounts:
+            - mountPath: /data/media
+              name: media
+              readOnly: True
+            - mountPath: /config
+              name: config
+      volumes:
+        - name: media
+          nfs:
+            path: /Public/Media
+            server: 192.168.100.72
+        - name: config
+          persistentVolumeClaim:
+            claimName: jellyfin-config
+      restartPolicy: Always
