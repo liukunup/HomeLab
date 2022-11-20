@@ -1,0 +1,52 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: code-server
+  labels:
+    app: code-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: code-server
+  template:
+    metadata:
+      labels:
+        app: code-server
+    spec:
+      containers:
+        - name: code-server
+          image: lscr.io/linuxserver/code-server:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8443
+              name: webui
+              protocol: TCP
+          env:
+            - name: DEFAULT_WORKSPACE
+              value: '/config/workspace'
+            - name: HASHED_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: code-server
+                  key: password
+            - name: SUDO_PASSWORD_HASH
+              valueFrom:
+                configMapKeyRef:
+                  name: code-server
+                  key: password
+          resources:
+            requests:
+              cpu: 250m
+              memory: 750Mi
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+          volumeMounts:
+            - mountPath: /config
+              name: config
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: code-server-config

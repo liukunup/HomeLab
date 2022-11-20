@@ -1,0 +1,19 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: code-server
+  labels:
+    app: code-server
+spec:
+  rules:
+  - host: vscode.homelab.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: code-server
+            port:
+              number: 8443

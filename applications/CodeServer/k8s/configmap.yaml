@@ -1,0 +1,9 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: code-server
+  labels:
+    app: code-server
+data:
+  password: '$argon2i$v=19$m=4096,t=3,p=1$kWrzf2c0IKyk8t/LwhEyJg$Ps0yVV637Oy9fv0RxBxhIwhbGweQYNDjOMdy69MGyW4'
