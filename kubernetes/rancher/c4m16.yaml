@@ -8,7 +8,7 @@ nodes:
   - controlplane
   - worker
   - etcd
-  hostname_override: ""
+  hostname_override: "master1"
   user: liukunup
   docker_socket: /var/run/docker.sock
   ssh_key: ""
@@ -23,7 +23,7 @@ nodes:
   role:
   - worker
   - etcd
-  hostname_override: ""
+  hostname_override: "node1"
   user: liukunup
   docker_socket: /var/run/docker.sock
   ssh_key: ""
@@ -38,7 +38,7 @@ nodes:
   role:
   - worker
   - etcd
-  hostname_override: ""
+  hostname_override: "node2"
   user: liukunup
   docker_socket: /var/run/docker.sock
   ssh_key: ""
