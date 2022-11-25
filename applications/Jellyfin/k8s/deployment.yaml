@@ -15,10 +15,24 @@ spec:
       labels:
         app: jellyfin
     spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - master1
       containers:
         - name: jellyfin
           image: docker.io/jellyfin/jellyfin:latest
           imagePullPolicy: IfNotPresent
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/bin/sh", "-c", "apt-get update && apt-get install -y fonts-noto-cjk-extra"]
           ports:
             - containerPort: 8096
               name: http
