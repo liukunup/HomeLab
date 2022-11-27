@@ -8,14 +8,15 @@ nodes:
   - controlplane
   - worker
   - etcd
-  hostname_override: ""
+  hostname_override: "master2"
   user: liukunup
   docker_socket: /var/run/docker.sock
   ssh_key: ""
   ssh_key_path: ~/.ssh/id_rsa
   ssh_cert: ""
   ssh_cert_path: ""
-  labels: {}
+  labels:
+    gpu: "GeForce-RTX3060"
   taints: []
 - address: 192.168.100.33
   port: "22"
@@ -23,7 +24,7 @@ nodes:
   role:
   - worker
   - etcd
-  hostname_override: ""
+  hostname_override: "node3"
   user: liukunup
   docker_socket: /var/run/docker.sock
   ssh_key: ""
@@ -38,7 +39,7 @@ nodes:
   role:
   - worker
   - etcd
-  hostname_override: ""
+  hostname_override: "node4"
   user: liukunup
   docker_socket: /var/run/docker.sock
   ssh_key: ""
