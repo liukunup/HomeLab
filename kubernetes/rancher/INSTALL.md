@@ -63,7 +63,7 @@ rke up --update-only
 # 创建配置目录
 mkdir -p $HOME/.kube
 # 将认证凭据拷贝到配置目录
-sudo cp -i kube_config_cluster.yml $HOME/.kube/config
+sudo cp -i kube_config_cluster.yaml $HOME/.kube/config
 # 修改文件所有者信息
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
@@ -135,12 +135,14 @@ helm install nfs-subdir-external-provisioner \
 查看[配置参数](metallb-config.yaml)
 
 ```shell
-# 创建命名空间
-kubectl create namespace metallb-system
 # 新增 Helm Chart
 helm repo add metallb https://metallb.github.io/metallb
+# 创建命名空间
+kubectl create namespace metallb-system
 # 安装 metallb
-helm install metallb --namespace metallb-system metallb/metallb
+helm install metallb \
+  -n metallb-system \
+  metallb/metallb
 # 更新配置
 kubectl apply -f metallb-config.yaml
 ```
