@@ -27,3 +27,17 @@ kubectl create namespace homelab
 ```shell
 kubectl apply -f k8s -n homelab
 ```
+
+## 中文支持镜像
+
+- 构建
+
+```shell
+docker build -t liukunup/jellyfin:latest .
+```
+
+- 推送
+
+```shell
+docker push liukunup/jellyfin:latest
+```
