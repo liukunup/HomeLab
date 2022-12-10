@@ -15,26 +15,16 @@ spec:
       labels:
         app: notebook
     spec:
-      affinity:
-        nodeAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              preference:
-                matchExpressions:
-                  - key: kubernetes.io/hostname
-                    operator: In
-                    values:
-                      - master1
       containers:
         - name: notebook
-          image: jupyter/minimal-notebook:notebook-6.5.1
+          image: jupyter/minimal-notebook:notebook-6.5.2
           imagePullPolicy: IfNotPresent
           command: ["start-notebook.sh"]
           args:
             - --NotebookApp.password='sha1:a7c0702d28e9:8a8868c5d4ea33af70e04c634487402b3997f40c'
           ports:
             - containerPort: 8888
-              name: webui
+              name: http
               protocol: TCP
           env:
             - name: DOCKER_STACKS_JUPYTER_CMD
@@ -43,15 +33,15 @@ spec:
               value: 'yes'
           resources:
             requests:
-              cpu: 250m
-              memory: 750Mi
+              cpu: 500m
+              memory: 1Gi
             limits:
-              cpu: 1000m
-              memory: 2Gi
+              cpu: 4000m
+              memory: 8Gi
           volumeMounts:
             - mountPath: /home/jovyan/work
-              name: data
+              name: work
       volumes:
-        - name: data
+        - name: work
           persistentVolumeClaim:
             claimName: notebook
