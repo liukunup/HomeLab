@@ -27,12 +27,8 @@ spec:
                       - master2
       containers:
         - name: jellyfin
-          image: docker.io/jellyfin/jellyfin:latest
+          image: liukunup/jellyfin:latest
           imagePullPolicy: IfNotPresent
-          lifecycle:
-            postStart:
-              exec:
-                command: ["/bin/sh", "-c", "apt-get update && apt-get install -y fonts-noto-cjk-extra"]
           ports:
             - containerPort: 8096
               name: http
@@ -40,11 +36,11 @@ spec:
             - containerPort: 8920
               name: https
               protocol: TCP
+            # Service Discovery
             - containerPort: 1900
-              name: s-discovery
               protocol: UDP
+            # Client Discovery
             - containerPort: 7359
-              name: c-discovery
               protocol: UDP
           env:
             - name: NODE_NAME
@@ -64,8 +60,8 @@ spec:
                   fieldPath: metadata.namespace
           resources:
             requests:
-              cpu: 250m
-              memory: 750Mi
+              cpu: 500m
+              memory: 1Gi
             limits:
               cpu: 2000m
               memory: 4Gi
@@ -74,12 +70,17 @@ spec:
               name: media
             - mountPath: /config
               name: config
+            - mountPath: /cache
+              name: cache
       volumes:
         - name: media
           nfs:
-            path: /Public/Media
+            path: /Multimedia/Media
             server: 192.168.100.72
         - name: config
           persistentVolumeClaim:
             claimName: jellyfin-config
+        - name: cache
+          persistentVolumeClaim:
+            claimName: jellyfin-cache
       restartPolicy: Always
