@@ -150,6 +150,8 @@ kubectl apply -f metallb-config.yaml
 
 ## 可视化管理界面
 
+### Docker
+
 1. 拉取镜像
 
 ```shell
@@ -207,3 +209,48 @@ spec:
         hostnames:
         - "xxx.com"
 ```
+
+### Helm
+
+- 新增Helm仓库
+
+```shell
+# 建议用于试用最新功能
+helm repo add rancher-latest https://releases.rancher.com/server-charts/latest
+# 建议用于生产环境
+helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
+```
+
+- 创建命名空间
+
+```shell
+kubectl create namespace cattle-system
+```
+
+- 安装cert-manager
+
+```shell
+# 初始化所需的CRDs
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.7.1/cert-manager.crds.yaml
+# 新增Helm仓库
+helm repo add jetstack https://charts.jetstack.io
+# 更新
+helm repo update
+# 安装
+helm install cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --version v1.10.1
+```
+
+- 安装rancher
+
+```shell
+helm install rancher rancher-latest/rancher \
+  --namespace cattle-system \
+  --set hostname=<XXX>.homelab.com \
+  --set replicas=1 \
+  --set bootstrapPassword=<PASSWORD_FOR_RANCHER_ADMIN>
+```
+
+> 在浏览器中打开 https://<XXX>.homelab.com/dashboard/
