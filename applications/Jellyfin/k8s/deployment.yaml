@@ -23,8 +23,7 @@ spec:
                   - key: kubernetes.io/hostname
                     operator: In
                     values:
-                      - master1
-                      - master2
+                      - node1
       containers:
         - name: jellyfin
           image: liukunup/jellyfin:latest
@@ -76,7 +75,7 @@ spec:
         - name: media
           nfs:
             path: /Multimedia/Media
-            server: 192.168.100.72
+            server: quts.homelab.com
         - name: config
           persistentVolumeClaim:
             claimName: jellyfin-config
