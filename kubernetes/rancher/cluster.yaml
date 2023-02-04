@@ -1,14 +1,45 @@
 # If you intended to deploy Kubernetes in an air-gapped environment,
 # please consult the documentation on how to configure custom RKE images.
 nodes:
-- address: 192.168.100.21
+- address: 192.168.100.51
   port: "22"
   internal_address: ""
   role:
   - controlplane
   - worker
   - etcd
-  hostname_override: "master1"
+  hostname_override: "node1"
+  user: liukunup
+  docker_socket: /var/run/docker.sock
+  ssh_key: ""
+  ssh_key_path: ~/.ssh/id_rsa
+  ssh_cert: ""
+  ssh_cert_path: ""
+  labels:
+    gpu: "GeForce-RTX3060"
+  taints: []
+- address: 192.168.100.52
+  port: "22"
+  internal_address: ""
+  role:
+  - worker
+  - etcd
+  hostname_override: "node2"
+  user: liukunup
+  docker_socket: /var/run/docker.sock
+  ssh_key: ""
+  ssh_key_path: ~/.ssh/id_rsa
+  ssh_cert: ""
+  ssh_cert_path: ""
+  labels: {}
+  taints: []
+- address: 192.168.100.53
+  port: "22"
+  internal_address: ""
+  role:
+  - worker
+  - etcd
+  hostname_override: "node3"
   user: liukunup
   docker_socket: /var/run/docker.sock
   ssh_key: ""
@@ -175,7 +206,7 @@ ingress:
   default_http_backend_priority_class_name: ""
   nginx_ingress_controller_priority_class_name: ""
   default_ingress_class: null
-cluster_name: "homelab1.rke"
+cluster_name: "homelab.rke"
 cloud_provider:
   name: ""
 prefix_path: ""

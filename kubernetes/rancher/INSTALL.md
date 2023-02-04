@@ -38,11 +38,11 @@ rke config --name=cluster.yml
 
 ```shell
 # 1.执行以下命令(可以连续回车3次,即不设置密码)
-ssh-keygen -t rsa -C "username@yourdoamin.com"
+ssh-keygen -t rsa -C "username@homelab.com"
 # 2.查看公钥信息(可选)
 cat ~/.ssh/id_rsa.pub
 # 3.发送公钥到对端进行免密授权
-ssh-copy-id -i ~/.ssh/id_rsa.pub username@192.168.1.100
+ssh-copy-id -i ~/.ssh/id_rsa.pub username@192.168.1.x
 ```
 
 好了，现在可以执行下述命令拉起集群了。这需要一些时间，取决于你的网络情况。
@@ -215,8 +215,6 @@ spec:
 - 新增Helm仓库
 
 ```shell
-# 建议用于试用最新功能
-helm repo add rancher-latest https://releases.rancher.com/server-charts/latest
 # 建议用于生产环境
 helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
 ```
@@ -246,11 +244,11 @@ helm install cert-manager jetstack/cert-manager \
 - 安装rancher
 
 ```shell
-helm install rancher rancher-latest/rancher \
+helm install rancher rancher-stable/rancher \
   --namespace cattle-system \
-  --set hostname=<XXX>.homelab.com \
+  --set hostname=rancher.homelab.com \
   --set replicas=1 \
-  --set bootstrapPassword=<PASSWORD_FOR_RANCHER_ADMIN>
+  --set bootstrapPassword=<注意将这里替换成您的密码>
 ```
 
-> 在浏览器中打开 https://<XXX>.homelab.com/dashboard/
+> 在浏览器中打开 https://rancher.homelab.com/dashboard/
