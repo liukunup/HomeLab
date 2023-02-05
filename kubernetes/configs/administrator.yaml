@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: homelab-admin
+type: Opaque
+stringData:
+  # 设置前请修改 `账号`+`密码`
+  # shell `kubectl apply -f administrator.yaml -n homelab`
+  username: liukunup # required field for kubernetes.io/basic-auth
+  password: password # required field for kubernetes.io/basic-auth
