@@ -1,0 +1,22 @@
+# 设置密码
+password: "123456"
+# 集群模式
+cluster:
+  # 使能集群初始化
+  init: true
+  # 预设共 `6` 节点(3节点+3哨兵)
+  nodes: 6
+  replicas: 1
+# 设置持久化存储空间
+persistence:
+  size: 8Gi
+# 设置容器参数
+redis:
+  extraEnvVars:
+    # 设置时区
+    - name: TZ
+      value: "Asia/Shanghai"
+# 使能`Network Policy`并允许任意外部来源的访问
+networkPolicy:
+  enabled: true
+  allowExternal: true
