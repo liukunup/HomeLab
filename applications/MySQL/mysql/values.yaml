@@ -1,24 +1,24 @@
-# 设置身份验证参数
 auth:
-  # 设置 `root` 超级管理员密码
+  # 设置 `root` 超级管理员的密码
   rootPassword: "123456"
-  # 创建自定义数据库(以电商为例)
+  # 创建自定义数据库(以电商为例)以及新建对应用户
   database: "e_commerce"
   username: "e_commerce"
   password: "123456"
-
 # 主从复制(一主二从)
 architecture: replication
 # 主数据库
 primary:
+  # 设置持久化存储空间
   persistence:
     size: 8Gi
 # 从数据库
 secondary:
-  replicaCount: 2
+  # 设置持久化存储空间
   persistence:
     size: 8Gi
-
+  # 设置实例数量
+  replicaCount: 2
 # 使能`Network Policy`并允许任意外部来源的访问
 networkPolicy:
   enabled: true

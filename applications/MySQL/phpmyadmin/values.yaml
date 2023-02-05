@@ -1,8 +1,3 @@
-# 使能Ingress并设置 `phpmyadmin.homelab.com` 作为访问域名
-ingress:
-  enabled: true
-  hostname: phpmyadmin.homelab.com
-
 # 配置待访问的数据库服务(通过SVC域名方式)
 db:
   # 禁止任意服务器
@@ -10,3 +5,7 @@ db:
   # 主机 + 端口
   host: mysql-primary.homelab.svc.cluster.local
   port: 3306
+# 使能Ingress并设置 `phpmyadmin.homelab.com` 作为访问域名
+ingress:
+  enabled: true
+  hostname: phpmyadmin.homelab.com
