@@ -15,8 +15,7 @@ nodes:
   ssh_key_path: ~/.ssh/id_rsa
   ssh_cert: ""
   ssh_cert_path: ""
-  labels:
-    gpu: "GeForce-RTX3060"
+  labels: {}
   taints: []
 - address: 192.168.100.52
   port: "22"

@@ -147,6 +147,101 @@ helm install metallb \
 kubectl apply -f metallb-config.yaml
 ```
 
+### [NVIDIA device plugin for Kubernetes](https://github.com/NVIDIA/k8s-device-plugin)
+
+解决集群中使用`GPU`的问题
+
+#### 预处理(仅安装了GPU的节点)
+
+1. 安装`nvidia-container-toolkit`
+
+```shell
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/libnvidia-container/gpgkey | sudo apt-key add -
+curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | sudo tee /etc/apt/sources.list.d/libnvidia-container.list
+
+sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
+```
+
+2. 修改`/etc/docker/daemon.json`
+
+```text
+{
+    "default-runtime": "nvidia",
+    "runtimes": {
+        "nvidia": {
+            "path": "/usr/bin/nvidia-container-runtime",
+            "runtimeArgs": []
+        }
+    }
+}
+```
+
+3. 重启`docker`
+
+```shell
+sudo systemctl restart docker
+```
+
+#### 部署插件
+
+```shell
+# 新增 Helm Chart 并更新
+helm repo add nvdp https://nvidia.github.io/k8s-device-plugin
+helm repo update
+# 查询最新版本
+helm search repo nvdp --devel
+# 安装指定版本
+helm upgrade -i nvdp nvdp/nvidia-device-plugin \
+  --namespace nvidia-device-plugin \
+  --create-namespace \
+  --version 0.13.0
+```
+
+#### 测试插件
+
+部署一个用于测试的Pod
+
+注意 `nvidia.com/gpu` 的写法
+
+```shell
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gpu-pod
+spec:
+  restartPolicy: Never
+  containers:
+    - name: cuda-container
+      image: nvcr.io/nvidia/k8s/cuda-sample:vectoradd-cuda10.2
+      resources:
+        limits:
+          nvidia.com/gpu: 1 # requesting 1 GPU
+  tolerations:
+  - key: nvidia.com/gpu
+    operator: Exists
+    effect: NoSchedule
+EOF
+```
+
+查看Pod日志
+
+```shell
+kubectl logs gpu-pod
+```
+
+日志打印如下则成功
+
+```text
+[Vector addition of 50000 elements]
+Copy input data from the host memory to the CUDA device
+CUDA kernel launch with 196 blocks of 256 threads
+Copy output data from the CUDA device to the host memory
+Test PASSED
+Done
+```
+
 
 ## 可视化管理界面
 
