@@ -6,7 +6,7 @@ metadata:
   annotations:
     volume.beta.kubernetes.io/storage-provisioner: k8s-sigs.io/nfs-subdir-external-provisioner
 spec:
-  storageClassName: nas-qnap-kubernetes  # 请确保`StorageClass`已存在
+  storageClassName: standard  # 请确保`StorageClass`已存在
   accessModes:
     - ReadWriteOnce
   resources:
