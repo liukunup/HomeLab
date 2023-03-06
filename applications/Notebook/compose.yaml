@@ -5,14 +5,17 @@ networks:
     driver: bridge
 
 volumes:
-  notebook:
+  notebook-python:
+  notebook-cpp:
+  notebook-sql:
 
 services:
 
-  notebook:
-    image: jupyter/minimal-notebook:notebook-6.5.1
-    container_name: minimal-notebook
-    hostname: minimal-notebook
+  # Python
+  notebook-python:
+    image: jupyter/minimal-notebook:notebook-6.5.2
+    container_name: notebook-python
+    hostname: notebook-python
     command: start-notebook.sh --NotebookApp.password=${JUPYTER_NOTEBOOK_PASSWORD:?error}
     restart: always
     environment:
@@ -21,10 +24,55 @@ services:
       - PUID=1000
       - PGID=1000
       - DOCKER_STACKS_JUPYTER_CMD=lab
+      - JUPYTER_ENABLE_LAB=yes
       - GRANT_SUDO=yes
     volumes:
-      - notebook:/home/jovyan/work
+      - notebook-python:/home/jovyan/work
     ports:
       - "8888:8888"
+    networks:
+      - notebook
+
+  # C++
+  notebook-cpp:
+    image: datainpoint/xeus-cling-notebook:latest
+    container_name: notebook-cpp
+    hostname: notebook-cpp
+    command: start-notebook.sh --NotebookApp.password=${JUPYTER_NOTEBOOK_PASSWORD:?error}
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+      - LANG=en_US.UTF-8
+      - PUID=1000
+      - PGID=1000
+      - DOCKER_STACKS_JUPYTER_CMD=lab
+      - JUPYTER_ENABLE_LAB=yes
+      - GRANT_SUDO=yes
+    volumes:
+      - notebook-cpp:/home/jovyan/work
+    ports:
+      - "8889:8888"
+    networks:
+      - notebook
+
+  # SQL
+  notebook-sql:
+    image: datainpoint/xeus-sql-notebook:latest
+    container_name: notebook-sql
+    hostname: notebook-sql
+    command: start-notebook.sh --NotebookApp.password=${JUPYTER_NOTEBOOK_PASSWORD:?error}
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+      - LANG=en_US.UTF-8
+      - PUID=1000
+      - PGID=1000
+      - DOCKER_STACKS_JUPYTER_CMD=lab
+      - JUPYTER_ENABLE_LAB=yes
+      - GRANT_SUDO=yes
+    volumes:
+      - notebook-sql:/home/jovyan/work
+    ports:
+      - "8890:8888"
     networks:
       - notebook

@@ -1,0 +1,93 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: notebook-sql
+  labels:
+    app: notebook-sql
+spec:
+  serviceName: notebook-sql
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notebook-sql
+  template:
+    metadata:
+      labels:
+        app: notebook-sql
+    spec:
+      containers:
+      - name: notebook-sql
+        image: datainpoint/xeus-sql-notebook:latest
+        imagePullPolicy: IfNotPresent
+        command: ["start-notebook.sh"]
+        args:
+          - --NotebookApp.password='argon2:$argon2id$v=19$m=10240,t=10,p=8$LaE/ahJVX6KHFhkYvwPv9w$BN+q+SBvJlcFn41qEIUq2GMT/TapRZcoiPeJfmvyqdA'
+        ports:
+          - containerPort: 8888
+            name: http
+            protocol: TCP
+        env:
+          - name: DOCKER_STACKS_JUPYTER_CMD
+            value: 'lab'
+          - name: JUPYTER_ENABLE_LAB
+            value: 'yes'
+          - name: GRANT_SUDO
+            value: 'yes'
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 4000m
+            memory: 8Gi
+        volumeMounts:
+          - mountPath: /home/jovyan/work
+            name: data
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      annotations:
+        volume.beta.kubernetes.io/storage-provisioner: k8s-sigs.io/nfs-subdir-external-provisioner
+    spec:
+      storageClassName: standard  # 请确保`StorageClass`已存在
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notebook-sql
+  labels:
+    app: notebook-sql
+spec:
+  ports:
+    - port: 8888
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: notebook-sql
+  sessionAffinity: None
+  type: LoadBalancer
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: notebook-sql
+  labels:
+    app: notebook-sql
+spec:
+  rules:
+  - host: sql.notebook.homelab.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: notebook-sql
+            port:
+              number: 8888
