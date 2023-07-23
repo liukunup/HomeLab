@@ -19,34 +19,36 @@
     如果不存在命名空间则需先创建
 
     ```shell
-    kubectl create namespace homelab
+    kubectl create namespace devops
     ```
 
     依次部署MySQL、phpMyAdmin
 
     ```shell
+    # Password
+    kubectl apply -f mysql/password.yaml --namespace devops
     # MySQL
-    helm install -f mysql/values.yaml mysql bitnami/mysql --namespace homelab
+    helm install -f mysql/values.yaml mysql bitnami/mysql --namespace devops
     # phpMyAdmin
-    helm install -f phpmyadmin/values.yaml phpmyadmin bitnami/phpmyadmin --namespace homelab
+    helm install -f phpmyadmin/values.yaml phpmyadmin bitnami/phpmyadmin --namespace devops
     ```
 
 - 更新配置
 
     ```shell
     # MySQL
-    helm upgrade -f mysql/values.yaml mysql bitnami/mysql --namespace homelab
+    helm upgrade -f mysql/values.yaml mysql bitnami/mysql --namespace devops
     # phpMyAdmin
-    helm upgrade -f phpmyadmin/values.yaml phpmyadmin bitnami/phpmyadmin --namespace homelab
+    helm upgrade -f phpmyadmin/values.yaml phpmyadmin bitnami/phpmyadmin --namespace devops
     ```
 
 - 卸载应用
 
     ```shell
     # phpMyAdmin
-    helm uninstall phpmyadmin --namespace homelab
+    helm uninstall phpmyadmin --namespace devops
     # MySQL
-    helm uninstall mysql --namespace homelab
+    helm uninstall mysql --namespace devops
     ```
 
 ## 体验试用
