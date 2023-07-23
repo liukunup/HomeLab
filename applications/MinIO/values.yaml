@@ -1,0 +1,19 @@
+# 设置分布式部署
+mode: distributed
+# 设置密码
+auth:
+  existingSecret: minio
+  # 强制用户必须使用密码
+  forcePassword: true
+# 使能Ingress并设置 `minio.homelab.com` 作为访问域名
+ingress:
+  enabled: true
+  hostname: minio.homelab.com
+# 设置持久化存储空间
+persistence:
+  storageClass: standard
+  size: 8Gi
+# 使能`Network Policy`并允许任意外部来源的访问
+networkPolicy:
+  enabled: true
+  allowExternal: true
