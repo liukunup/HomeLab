@@ -5,13 +5,16 @@
 ## 安装步骤
 
 前置条件:
+
 1. 确保已存在默认的存储类；
+
 2. 确保已配置Ingress控制器；
 
 - 添加仓库
 
     ```shell
     helm repo add bitnami https://charts.bitnami.com/bitnami
+    helm repo update
     ```
 
 - 部署应用
@@ -19,36 +22,36 @@
     如果不存在命名空间则需先创建
 
     ```shell
-    kubectl create namespace devops
+    kubectl create namespace homelab
     ```
 
     依次部署MySQL、phpMyAdmin
 
     ```shell
     # Password
-    kubectl apply -f mysql/password.yaml --namespace devops
+    kubectl apply -f mysql/password.yaml -n homelab
     # MySQL
-    helm install -f mysql/values.yaml mysql bitnami/mysql --namespace devops
+    helm install -f mysql/values.yaml mysql bitnami/mysql -n homelab
     # phpMyAdmin
-    helm install -f phpmyadmin/values.yaml phpmyadmin bitnami/phpmyadmin --namespace devops
+    helm install -f phpmyadmin/values.yaml phpmyadmin bitnami/phpmyadmin -n homelab
     ```
 
 - 更新配置
 
     ```shell
     # MySQL
-    helm upgrade -f mysql/values.yaml mysql bitnami/mysql --namespace devops
+    helm upgrade -f mysql/values.yaml mysql bitnami/mysql --namespace homelab
     # phpMyAdmin
-    helm upgrade -f phpmyadmin/values.yaml phpmyadmin bitnami/phpmyadmin --namespace devops
+    helm upgrade -f phpmyadmin/values.yaml phpmyadmin bitnami/phpmyadmin -n homelab
     ```
 
 - 卸载应用
 
     ```shell
     # phpMyAdmin
-    helm uninstall phpmyadmin --namespace devops
+    helm uninstall phpmyadmin -n homelab
     # MySQL
-    helm uninstall mysql --namespace devops
+    helm uninstall mysql -n homelab
     ```
 
 ## 体验试用
