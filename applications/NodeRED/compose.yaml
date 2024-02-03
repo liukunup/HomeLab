@@ -1,0 +1,22 @@
+version: '3'
+
+volumes:
+  node-red-data: {}
+
+services:
+  node-red:
+    image: nodered/node-red:latest
+    container_name: nodered
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Shanghai
+      - LANG=en_US.UTF-8
+    ports:
+      - 1880:1880
+    volumes:
+      - node-red-data:/data
+    networks:
+      - node-red-net
+
+networks:
+  node-red-net:
