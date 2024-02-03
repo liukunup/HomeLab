@@ -6,6 +6,7 @@ image:
   pullPolicy: IfNotPresent
 
 nfs:
+  # 配置你的NFS共享目录
   server: quts.homelab.com
   path: /Kubernetes/rke2
 # mountOptions:
