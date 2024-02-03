@@ -1,4 +1,4 @@
-# 基于Rancher搭建k8s集群 (RKE)
+# 基于Rancher搭建Kubernetes集群 (RKE)
 
 Rancher Kubernetes Engine，简称 RKE，是一个经过 CNCF 认证的 Kubernetes 安装程序。RKE 支持多种操作系统，包括 MacOS、Linux 和 Windows，可以在裸金属服务器（BMS）和虚拟服务器（Virtualized Server）上运行。
 
@@ -92,3 +92,7 @@ kubectl get pods --all-namespaces -o wide
 # 获取Token(可用于Kubernetes Dashboard)
 kubectl describe $(kubectl get secret -n kube-system -o name | grep namespace) -n kube-system | grep token
 ```
+
+## 其他后续工作
+
+- 安装组件/插件 👉 [安装手册](COMPONENT.md)
