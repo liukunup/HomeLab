@@ -6,7 +6,7 @@ metadata:
   namespace: metallb-system
 spec:
   addresses:
-  - 192.168.100.150-192.168.100.200
+  - 192.168.100.150-192.168.100.200 # 划定当前网络中的一段地址作为IP池
 ---
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement
