@@ -2,9 +2,9 @@
 
 ## NFS Subdir External Provisioner
 
-解决持久化卷的问题
+解决`StorageClass`的问题
 
-国内受到GFW的影响，最好提前下载好`k8s.gcr.io/sig-storage/nfs-subdir-external-provisioner`镜像。
+> 国内受到GFW的影响，最好提前下载好`registry.k8s.io/sig-storage/nfs-subdir-external-provisioner`镜像。
 
 ```shell
 # 国内镜像替代品
@@ -18,24 +18,27 @@ docker tag ${IMAGE}:${VERSION} k8s.gcr.io/sig-storage/nfs-subdir-external-provis
 docker rmi ${IMAGE}:${VERSION}
 ```
 
-配置参数[nfs-subdir-external-provisioner-values.yaml](nfs-subdir-external-provisioner-values.yaml)
+查看配置参数 [nfs-subdir-external-provisioner-values.yaml](nfs-subdir-external-provisioner-values.yaml)
 
 ```shell
-# 新增 Helm Chart
+# 新增 helm repo
 helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/
+# 更新 helm repo
 helm repo update
 
-# 安装 nfs-subdir-external-provisioner
-kubectl create namespace nfs-provisioner
+# 创建命名空间
+kubectl create namespace provisioner-system
 
+# 安装 nfs-subdir-external-provisioner
 helm install nfs-subdir-external-provisioner \
   nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
-  -n nfs-provisioner \
+  -n provisioner-system \
   -f nfs-subdir-external-provisioner-values.yaml
 
+# 更新 nfs-subdir-external-provisioner
 helm upgrade nfs-subdir-external-provisioner \
   nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
-  -n nfs-provisioner \
+  -n provisioner-system \
   -f nfs-subdir-external-provisioner-values.yaml
 ```
 
@@ -43,11 +46,14 @@ helm upgrade nfs-subdir-external-provisioner \
 
 解决`LoadBalancer`的问题
 
-查看[配置参数](metallb-config.yaml)
+查看配置参数 [metallb-config.yaml](metallb-config.yaml)
 
 ```shell
-# 新增 Helm Chart
+# 新增 helm repo
 helm repo add metallb https://metallb.github.io/metallb
+# 更新 helm repo
+helm repo update
+
 # 创建命名空间
 kubectl create namespace metallb-system
 # 安装 metallb
@@ -58,99 +64,17 @@ helm install metallb \
 kubectl apply -f metallb-config.yaml
 ```
 
-## [NVIDIA device plugin for Kubernetes](https://github.com/NVIDIA/k8s-device-plugin)
+## cert-manager
 
-解决集群中使用`GPU`的问题
+解决`Certificate`的问题
 
-### 预处理(仅安装了GPU的节点)
-
-1. 安装`nvidia-container-toolkit`
+想查看[官方安装手册](https://cert-manager.io/docs/installation/kubectl/)？
 
 ```shell
-distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
-curl -s -L https://nvidia.github.io/libnvidia-container/gpgkey | sudo apt-key add -
-curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | sudo tee /etc/apt/sources.list.d/libnvidia-container.list
-
-sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
-```
-
-2. 修改`/etc/docker/daemon.json`
-
-```text
-{
-    "default-runtime": "nvidia",
-    "runtimes": {
-        "nvidia": {
-            "path": "/usr/bin/nvidia-container-runtime",
-            "runtimeArgs": []
-        }
-    }
-}
-```
-
-3. 重启`docker`
-
-```shell
-sudo systemctl restart docker
-```
-
-### 部署插件
-
-```shell
-# 新增 Helm Chart 并更新
-helm repo add nvdp https://nvidia.github.io/k8s-device-plugin
-helm repo update
-# 查询最新版本
-helm search repo nvdp --devel
-# 安装指定版本
-helm upgrade -i nvdp nvdp/nvidia-device-plugin \
-  --namespace nvidia-device-plugin \
-  --create-namespace \
-  --version 0.14.1
-```
-
-### 测试插件
-
-部署一个用于测试的Pod
-
-注意 `nvidia.com/gpu` 的写法
-
-```shell
-cat <<EOF | kubectl apply -f -
-apiVersion: v1
-kind: Pod
-metadata:
-  name: gpu-pod
-spec:
-  restartPolicy: Never
-  containers:
-    - name: cuda-container
-      image: nvcr.io/nvidia/k8s/cuda-sample:vectoradd-cuda10.2
-      resources:
-        limits:
-          nvidia.com/gpu: 1 # requesting 1 GPU
-  tolerations:
-  - key: nvidia.com/gpu
-    operator: Exists
-    effect: NoSchedule
-EOF
-```
-
-查看Pod日志
-
-```shell
-kubectl logs gpu-pod
-```
-
-日志打印如下则成功
-
-```text
-[Vector addition of 50000 elements]
-Copy input data from the host memory to the CUDA device
-CUDA kernel launch with 196 blocks of 256 threads
-Copy output data from the CUDA device to the host memory
-Test PASSED
-Done
+# 安装
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.1/cert-manager.yaml
+# 查看
+kubectl get pods -n cert-manager
 ```
 
 ## 可视化管理界面
@@ -166,7 +90,7 @@ docker pull rancher/rancher:stable
 2. 创建数据持久化路径
 
 ```shell
-mkdir /var/lib/rancher
+mkdir -p /var/lib/rancher
 ```
 
 3. 拉起容器
@@ -201,8 +125,11 @@ kubectl logs -n cattle-system cattle-cluster-agent-xxx
 # ERROR: https://xxx.com/ping is not accessible (Could not resolve host: xxx.com)
 # 修改 hostAliases 内容
 kubectl edit deployment -n cattle-system cattle-cluster-agent
+```
 
-# 需要修改部分
+需要修改部分如下
+
+```yaml
 spec:
   ...
   template:
@@ -210,18 +137,19 @@ spec:
     spec:
       # 加入以下内容
       hostAliases:
-      - ip: "192.168.1.xxx"
+      - ip: "192.168.100.x"
         hostnames:
-        - "xxx.com"
+        - "xxx.homelab.com"
 ```
 
-## Helm
+### Helm
 
 - 新增Helm仓库
 
 ```shell
 # 建议用于生产环境
 helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
+helm repo update
 ```
 
 - 创建命名空间
@@ -230,7 +158,7 @@ helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
 kubectl create namespace cattle-system
 ```
 
-- 安装cert-manager
+- 安装`cert-manager` (如果已经安装，可以跳过)
 
 ```shell
 # 初始化所需的CRDs
@@ -243,16 +171,16 @@ helm repo update
 helm install cert-manager jetstack/cert-manager \
   --namespace cert-manager \
   --create-namespace \
-  --version v1.13.1
+  --version v1.14.1
 ```
 
-- 安装rancher
+- 安装`rancher`
 
 ```shell
 helm install rancher rancher-stable/rancher \
   --namespace cattle-system \
   --set hostname=rancher.homelab.com \
-  --set bootstrapPassword=960x720@30HZ
+  --set bootstrapPassword=<password>
 ```
 
 > 在浏览器中打开 https://rancher.homelab.com/dashboard/
