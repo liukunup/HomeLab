@@ -1,10 +1,21 @@
-storageClass:
-  name: standard
-  defaultClass: true
-  allowVolumeExpansion: true
-  provisionerName: k8s-sigs.io/nfs-subdir-external-provisioner
+image:
+# repository: registry.k8s.io/sig-storage/nfs-subdir-external-provisioner
+# repository: k8s.gcr.io/sig-storage/nfs-subdir-external-provisioner # 已过期
+  repository: liukunup/nfs-subdir-external-provisioner
+  tag: v4.0.2
+  pullPolicy: IfNotPresent
+
 nfs:
   server: quts.homelab.com
-  path: /Kubernetes/pve
-  mountOptions:
-    - nfsvers=4.2
+  path: /Kubernetes/rke2
+# mountOptions:
+#   - nfsvers=4.2
+
+storageClass:
+  defaultClass: true
+  name: standard
+  allowVolumeExpansion: true
+  provisionerName: nfs-subdir-external-provisioner
+
+nodeSelector:
+  kubernetes.io/hostname: server
