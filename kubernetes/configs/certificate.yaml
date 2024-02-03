@@ -1,0 +1,13 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: devops-phpmyadmin-tls
+  namespace: devops
+spec:
+  secretName: devops-phpmyadmin-tls
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer
+  dnsNames:
+    - phpmyadmin.homelab.com
