@@ -74,3 +74,27 @@ kubectl label nodes nodeX node-role.kubernetes.io/worker=
 ```
 
 - 安装组件/插件 👉 [安装手册](COMPONENT.md)
+
+- 修改`Nginx Ingress`参数
+
+修改代理上传的大小限制
+
+```shell
+# 切换到root
+su -
+# 准备写入新的配置来覆盖
+vim /var/lib/rancher/rke2/server/manifests/rke2-ingress-nginx-config.yaml
+```
+
+```yaml
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: rke2-ingress-nginx
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    controller:
+      config:
+        proxy-body-size: "1024m"
+```
