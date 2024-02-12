@@ -1,0 +1,26 @@
+alertmanager:
+
+  ingress:
+    enabled: true
+    hosts:
+      - alertmanager.homelab.com
+    paths:
+      - /
+
+grafana:
+
+  ingress:
+    enabled: true
+    hosts:
+      - grafana.homelab.com
+    path: /
+
+  persistence:
+    enabled: true
+    type: sts
+    storageClassName: standard
+    accessModes:
+      - ReadWriteOnce
+    size: 20Gi
+    finalizers:
+      - kubernetes.io/pvc-protection
