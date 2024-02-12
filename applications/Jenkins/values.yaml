@@ -1,0 +1,11 @@
+controller:
+  ingress:
+    enabled: true
+    hostName: jenkins.homelab.com
+  installPlugins:
+    - configuration-as-code
+    - ldap
+persistence:
+  enabled: true
+  storageClass: standard
+  size: 100Gi
