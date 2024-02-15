@@ -1,6 +1,6 @@
 # Kube Prometheus Stack [GitHub](https://github.com/prometheus-operator/kube-prometheus)
 
-[ArtifactHub](https://artifacthub.io/packages/helm/prometheus-community/prometheus)
+[ArtifactHub](https://artifacthub.io/packages/helm/prometheus-community/kube-prometheus-stack)
 
 ## 安装部署
 
