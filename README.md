@@ -1,4 +1,18 @@
-# HomeLab 家庭实验室
+# HomeLab 我的家庭实验室
+
+你想过在家里搭建一个属于自己的实验室吗？独属于自己的小空间～
+
+本仓库将记录我在搭建家庭实验室过程中一些经验和心得，供大家参考。
+
+我的诉求:
+
+1. 持续运营时节能（迷你服务器）
+2. 强大的算力和存储（计算平台+NAS）
+3. 灵活的资源管理能力（JumpServer+Kubernetes）
+4. (可选)非必要服务随时可部署
+5. (可选)对外提供简单的服务能力（花生壳+蒲公英）
+
+## 整体方案
 
 TL;DR
 
@@ -12,12 +26,9 @@ TL;DR
 
 ✈️ 【外部】公网可访问（服务已做内网穿透）
 
-
-## 整体方案
-
 ### 集群
 
-家庭里的服务器裸机通过 ***RKE*** 来构建成一个`Kubernetes`集群。
+家庭里的服务器裸机通过 ***RKE2*** 来构建成一个`Kubernetes`集群。
 
 > RKE是一款经过CNCF认证、极致简单易用且闪电般快速的Kubernetes安装程序，完全在容器内运行，解决了容器最常见的安装复杂性问题。
 
@@ -38,33 +49,3 @@ TL;DR
   - DS220+ 2盘位
   - DS920+ 4盘位
 - （可选）**威联通 QNAP**
-
-
-## 机器资源规划
-
-- C4M16
-- C48M64G1
-
-| Name     | Roles                      | Sub Domain          | IP Address     | Mac Address       | Device   |
-|----------|----------------------------|---------------------|----------------|-------------------|----------|
-| Master 1 | worker, etcd, controlplane | master1.homelab.com | 192.168.100.21 | 56:E6:2F:80:80:45 | C4M16    |
-| Node 1   | worker, etcd               | node1.homelab.com   | 192.168.100.31 | E6:58:83:E7:33:98 | C4M16    |
-| Node 2   | worker, etcd               | node2.homelab.com   | 192.168.100.32 | E2:58:EB:E7:F6:64 | C4M16    |
-| Master 2 | worker, etcd, controlplane | master2.homelab.com | 192.168.100.22 | 46:8F:96:DB:F4:FA | C48M64G1 |
-| Node 3   | worker, etcd               | node3.homelab.com   | 192.168.100.33 | DE:E4:AF:82:FD:AE | C48M64G1 |
-| Node 4   | worker, etcd               | node4.homelab.com   | 192.168.100.34 | 06:A0:F4:94:E1:6D | C48M64G1 |
-
-> 查看集群节点 `kubectl get nodes -o wide`
-
-- 360家庭防火墙·路由器P2`自定义HOST`配置表
-
-```text
-192.168.100.21 master1.homelab.com
-192.168.100.22 master2.homelab.com
-192.168.100.31 node1.homelab.com
-192.168.100.32 node2.homelab.com
-192.168.100.33 node3.homelab.com
-192.168.100.34 node4.homelab.com
-```
-
-## 清单
