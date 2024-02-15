@@ -1,0 +1,81 @@
+service:
+  ssh:
+    annotations:
+      metallb.universe.tf/allow-shared-ip: gitea
+
+ingress:
+  enabled: true
+  hosts:
+    - host: git.homelab.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+persistence:
+  enabled: true
+  create: true
+  mount: true
+  claimName: gitea-shared-storage
+  size: 160Gi
+  accessModes:
+    - ReadWriteOnce
+  annotations:
+    helm.sh/resource-policy: keep
+
+gitea:
+  admin:
+    email: liukunbot@163.com
+    existingSecret: gitea-admin-secret
+  ldap:
+    - name: QuTS
+      securityProtocol: unencrypted
+      host: quts.homelab.com
+      port: 389
+      userSearchBase: ou=people,dc=quts,dc=homelab,dc=com
+      userFilter: (&(objectClass=posixAccount)(|(uid=%[1]s)(mail=%[1]s)))
+      emailAttribute: mail
+      existingSecret: gitea-ldap-secret
+      usernameAttribute: CN
+      publicSSHKeyAttribute: publicSSHKey
+  config:
+    # GRAVATAR
+    picture:
+      GRAVATAR_SOURCE: http://cravatar.cn/avatar/
+      REPOSITORY_AVATAR_FALLBACK: random
+      ENABLE_FEDERATED_AVATAR: true
+    # Actions
+    actions:
+      ENABLED: true
+      DEFAULT_ACTIONS_URL: github
+    # Mailer
+    mailer:
+      ENABLED: true
+      FROM: liukunbot@163.com
+      PROTOCOL: smtps
+      SMTP_ADDR: smtp.163.com
+      SMTP_PORT: 587
+      USER: liukunbot@163.com
+      PASSWD: xxx # 请修改成你的邮箱&密码
+    # LFS
+    server:
+      LFS_START_SERVER: true
+
+postgresql-ha:
+  enabled: true
+  global:
+    postgresql:
+      database: gitea
+      password: gRqfnS57WjW39oMT
+      username: M3Xhm0XG42NE3Izq
+  postgresql:
+    repmgrPassword: KQj3koNvxks32f3Y
+    postgresPassword: b8K7OlbBzxUmMJ6n
+    password: NwlmoLHhUi2lqTgF
+  pgpool:
+    adminPassword: TM1wL2pHckFoYgBb
+  service:
+    ports:
+      postgresql: 5432
+  primary:
+    persistence:
+      size: 8Gi
