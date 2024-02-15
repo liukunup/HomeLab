@@ -1,0 +1,75 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tabby
+  labels:
+    app: tabby
+spec:
+  serviceName: tabby
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tabby
+  template:
+    metadata:
+      labels:
+        app: tabby
+    spec:
+      terminationGracePeriodSeconds: 300
+      containers:
+      - name: tabby
+        image: tabbyml/tabby
+        args: [ "serve --model TabbyML/StarCoder-1B --device cuda" ]
+        env:
+        - name: TABBY_DOWNLOAD_HOST
+          value: www.modelscope.cn
+        ports:
+        - containerPort: 8080
+          name: api
+        volumeMounts:
+        - name: tabby
+          mountPath: /data
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+  volumeClaimTemplates:
+  - metadata:
+      name: tabby
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tabby-hl
+  labels:
+    app: tabby
+spec:
+  clusterIP: None
+  ports:
+  - port: 8080
+  selector:
+    app: tabby
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tabby
+  labels:
+    app: tabby
+spec:
+  rules:
+  - host: tabby.homelab.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: tabby-hl
+            port:
+              number: 8080
