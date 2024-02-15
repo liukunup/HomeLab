@@ -52,15 +52,12 @@ spec:
   volumeClaimTemplates:
   - metadata:
       name: data
-      annotations:
-        volume.beta.kubernetes.io/storage-provisioner: k8s-sigs.io/nfs-subdir-external-provisioner
     spec:
-      storageClassName: standard  # 请确保`StorageClass`已存在
       accessModes:
       - ReadWriteOnce
       resources:
         requests:
-          storage: 10Gi
+          storage: 50Gi
 ---
 apiVersion: v1
 kind: Service
