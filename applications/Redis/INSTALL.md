@@ -1,4 +1,4 @@
-# Redis Cluster
+# Redis
 
 KV数据库`Redis`集群部署指引
 
@@ -19,25 +19,25 @@ KV数据库`Redis`集群部署指引
     如果不存在命名空间则需先创建
 
     ```shell
-    kubectl create namespace homelab
+    kubectl create namespace devops
     ```
 
     部署Redis
 
     ```shell
-    helm install -f k8s/values.yaml redis-cluster bitnami/redis-cluster --namespace homelab
+    helm install -f values.yaml redis bitnami/redis-cluster --namespace homelab
     ```
 
 - 更新配置
 
     ```shell
-    helm upgrade -f k8s/values.yaml redis-cluster bitnami/redis-cluster --namespace homelab
+    helm upgrade -f values.yaml redis bitnami/redis-cluster --namespace homelab
     ```
 
 - 卸载应用
 
     ```shell
-    helm uninstall redis-cluster --namespace homelab
+    helm uninstall redis --namespace devops
     ```
 
 ## 体验试用

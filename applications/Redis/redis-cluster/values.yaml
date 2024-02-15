@@ -1,13 +1,13 @@
 # 设置密码
-password: "123456"
+existingSecret: redis
 # 集群模式
 cluster:
-  # 使能集群初始化
+  # 使能初始化
   init: true
-  # 预设共 `6` 节点(3节点+3哨兵)
+  # 预设共`6`节点(3节点+3哨兵)
   nodes: 6
   replicas: 1
-# 设置持久化存储空间
+# 设置持久化存储空间大小
 persistence:
   size: 8Gi
 # 设置容器参数
