@@ -1,0 +1,15 @@
+architecture: replication
+
+auth:
+  existingSecret: redis-secret
+  existingSecretPasswordKey: redis-password
+
+master:
+  count: 1
+  persistence:
+    size: 8Gi
+
+replica:
+  replicaCount: 3
+  persistence:
+    size: 8Gi

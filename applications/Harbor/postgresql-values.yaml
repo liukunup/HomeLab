@@ -1,0 +1,12 @@
+global:
+  postgresql:
+    auth:
+      username: M3Xhm0XG42NE3Izq
+      database: registry
+      existingSecret: postgresql-secret
+
+architecture: replication
+
+primary:
+  persistence:
+    size: 8Gi

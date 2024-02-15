@@ -1,0 +1,47 @@
+expose:
+  ingress:
+    hosts:
+      core: reg.homelab.com
+
+externalURL: https://reg.homelab.com
+
+internalTLS:
+  enabled: true
+  
+harborAdminPassword: "Harbor12345"
+
+persistence:
+  persistentVolumeClaim:
+    registry:
+      size: 5Gi
+    jobservice:
+      jobLog:
+        size: 1Gi
+    trivy:
+      size: 5Gi
+  imageChartStorage:
+    disableredirect: true
+    type: s3
+    s3:
+      region: us-west-1
+      bucket: registry
+      # 请修改AK+SK
+      accesskey: 6IrVCZMqr7rBhtz3YCpw
+      secretkey: aeIYNsIq4p0QlvHsTKW9Cg2gSuyUbvNr9IxtCR0W
+      regionendpoint: "http://minio.harbor.svc.cluster.local:9000"
+
+database:
+  type: external
+  external:
+    host: postgresql-primary.harbor.svc.cluster.local
+    port: 5432
+    username: M3Xhm0XG42NE3Izq
+    password: gRqfnS57WjW39oMT
+    coreDatabase: registry
+    sslmode: disable
+
+redis:
+  type: external
+  external:
+    addr: redis-master.harbor.svc.cluster.local:6379
+    password: Ggi057AOL8ZRrvxv

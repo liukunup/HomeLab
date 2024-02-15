@@ -1,0 +1,26 @@
+mode: standalone
+
+auth:
+  existingSecret: minio-secret
+  forcePassword: true
+
+defaultBuckets: "registry"
+
+provisioning:
+  enabled: true
+  usersExistingSecrets:
+    - centralized-minio-users
+  groups:
+    - name: admin
+      disabled: false
+      members:
+        - admin
+      policies:
+        - readwrite
+  config:
+    - name: region
+      options:
+        name: us-west-1
+
+persistence:
+  size: 8Gi
