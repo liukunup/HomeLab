@@ -3,8 +3,53 @@ controller:
     enabled: true
     hostName: jenkins.homelab.com
   installPlugins:
-    - configuration-as-code
-    - ldap
+    - kubernetes:4186.v1d804571d5d4
+    - workflow-aggregator:596.v8c21c963d92d
+    - git:5.2.1
+    - configuration-as-code:1775.v810dc950b_514
+    - ldap:711.vb_d1a_491714dc
+    - blueocean:1.27.11
+    - github:1.38.0
+  JCasC:
+    configScripts:
+      welcome-message: |
+        jenkins:
+          systemMessage: Welcome to our CI\CD server.
+      ldap-settings: |
+        jenkins:
+          securityRealm:
+            ldap:
+              configurations:
+                - server: "ldap://quts.homelab.com:389"
+                  rootDN: "dc=quts,dc=homelab,dc=com"
+                  userSearchBase: "ou=people"
+                  userSearch: "(uid={0})"
+                  managerDN: "cn=admin,dc=quts,dc=homelab,dc=com"
+                  managerPasswordSecret: "changeme"
+    authorizationStrategy: |-
+      loggedInUsersCanDoAnything:
+        allowAnonymousRead: false
+
+agent:
+  podTemplates:
+    python: |
+      - name: python
+        namespace: devops
+        label: jenkins-python
+        serviceAccount: jenkins
+        inheritFrom: python
+        containers:
+          - name: python
+            image: python:3
+            command: "/bin/sh -c"
+            args: "cat"
+            ttyEnabled: true
+            privileged: true
+            resourceRequestCpu: "500m"
+            resourceRequestMemory: "512Mi"
+            resourceLimitCpu: "4"
+            resourceLimitMemory: "8Gi"
+
 persistence:
   enabled: true
   storageClass: standard
