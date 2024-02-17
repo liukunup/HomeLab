@@ -1,4 +1,4 @@
-# Jenkins
+# Jenkins [Helm Charts](https://github.com/jenkinsci/helm-charts)
 
 ## 安装部署
 
@@ -6,24 +6,28 @@
 
 ```shell
 # 1. 添加仓库
-helm repo add jenkinsci https://charts.jenkins.io
+helm repo add jenkins https://charts.jenkins.io
 # 2. 更新仓库
 helm repo update
 
 # 3. 创建命名空间
 kubectl create namespace devops
+export K8S_NS=devops
 
 # 4. 安装
-helm install -f values.yaml jenkins jenkinsci/jenkins -n devops
+helm install -f values.yaml jenkins jenkins/jenkins -n $K8S_NS
 
 # 5. 获取管理密码
-kubectl exec -n devops -it svc/jenkins -c jenkins -- /bin/cat /run/secrets/additional/chart-admin-password && echo
+kubectl exec -n $K8S_NS -it svc/jenkins -c jenkins -- /bin/cat /run/secrets/additional/chart-admin-password && echo
 
 # 6. 更新
-helm upgrade -f values.yaml jenkins jenkinsci/jenkins -n devops
+helm upgrade -f values.yaml jenkins jenkinsci/jenkins -n $K8S_NS
     
 # 7. 卸载
-helm uninstall jenkins -n devops
+helm uninstall jenkins -n $K8S_NS
+
+# 查询状态
+kubectl get po -n $K8S_NS -o wide
 ```
 
 ## 登录&配置
@@ -33,14 +37,6 @@ helm uninstall jenkins -n devops
   - 密码 详见上述命令回显值
 - 打开页面[Jenkins](https://jenkins.homelab.com/)
 - 配置LDAP服务器
-
-```text
-managerDN: cn=admin,dc=quts,dc=homelab,dc=com
-managerPasswordSecret: xxx
-rootDN: dc=quts,dc=homelab,dc=com
-server: ldap://quts.homelab.com:389
-userSearchBase: ou=people
-```
 
 ## 部署日志
 
