@@ -26,6 +26,17 @@ controller:
                   userSearch: "(uid={0})"
                   managerDN: "cn=admin,dc=quts,dc=homelab,dc=com"
                   managerPasswordSecret: "changeme"
+      jenkins-casc-configs: |
+        credentials:
+          system:
+            domainCredentials:
+            - credentials:
+              - usernamePassword:
+                  id: "LiuKun"
+                  username: "liukunup"
+                  password: "changeme"
+                  scope: GLOBAL
+                  description: "It's me."
     authorizationStrategy: |-
       loggedInUsersCanDoAnything:
         allowAnonymousRead: false
