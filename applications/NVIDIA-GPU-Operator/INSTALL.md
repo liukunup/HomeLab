@@ -26,4 +26,7 @@ helm install -f values.yaml gpu-operator nvidia/gpu-operator -n gpu-operator --w
 
 # 查看部署结果
 kubectl logs -n gpu-operator nvidia-cuda-validator-<?> cuda-validation
+
+# 查看节点上的GPU资源
+kubectl get nodes -o=custom-columns=NAME:.metadata.name,GPUs:.status.capacity.'nvidia\.com/gpu'
 ```
