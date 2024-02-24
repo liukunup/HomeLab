@@ -26,6 +26,9 @@ helm uninstall kube-prometheus-stack -n monitoring
 # 查看
 kubectl -n monitoring get pods -l "release=kube-prometheus-stack"
 kubectl get all -n monitoring
+
+# 添加GPU监控(Grafana 12239)
+kubectl apply -f gpu.yaml -n monitoring
 ```
 
 ## 体验
