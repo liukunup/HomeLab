@@ -5,6 +5,7 @@ metadata:
   labels:
     app: nvidia-dcgm-exporter
     jobLabel: nvidia-dcgm-exporter
+    release: kube-prometheus-stack
 spec:
   jobLabel: nvidia-dcgm-exporter
   namespaceSelector:
