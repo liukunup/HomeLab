@@ -1,0 +1,95 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pytorch-notebook-gpu
+  labels:
+    app: pytorch-notebook-gpu
+spec:
+  serviceName: pytorch-notebook-gpu
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pytorch-notebook-gpu
+  template:
+    metadata:
+      labels:
+        app: pytorch-notebook-gpu
+    spec:
+      containers:
+      - name: pytorch-notebook-gpu
+        image: jupyter/pytorch-notebook:cuda12-pytorch-2.2.1
+        imagePullPolicy: IfNotPresent
+        command: ["start-notebook.sh"]
+        args:
+          - --NotebookApp.password='argon2:$argon2id$v=19$m=10240,t=10,p=8$LaE/ahJVX6KHFhkYvwPv9w$BN+q+SBvJlcFn41qEIUq2GMT/TapRZcoiPeJfmvyqdA'
+        ports:
+          - containerPort: 8888
+            name: http
+            protocol: TCP
+        env:
+          - name: DOCKER_STACKS_JUPYTER_CMD
+            value: 'lab'
+          - name: JUPYTER_ENABLE_LAB
+            value: 'yes'
+          - name: GRANT_SUDO
+            value: 'yes'
+        resources:
+          requests:
+            cpu: 500m
+            memory: 500Mi
+          limits:
+            cpu: 4000m
+            memory: 8Gi
+            nvidia.com/gpu: 1
+        volumeMounts:
+          - mountPath: /home/jovyan/work
+            name: data
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 50Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pytorch-notebook-gpu
+  labels:
+    app: pytorch-notebook-gpu
+spec:
+  ports:
+    - port: 8888
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: pytorch-notebook-gpu
+  sessionAffinity: None
+  type: LoadBalancer
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pytorch-notebook-gpu
+  labels:
+    app: pytorch-notebook-gpu
+spec:
+  rules:
+  - host: pytorch.jupyter.homelab.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: pytorch-notebook-gpu
+            port:
+              number: 8888
