@@ -16,6 +16,8 @@ spec:
       labels:
         app: pytorch-notebook-gpu
     spec:
+      securityContext:
+        fsGroup: 0
       containers:
       - name: pytorch-notebook-gpu
         image: quay.io/jupyter/pytorch-notebook:cuda12-pytorch-2.2.1
