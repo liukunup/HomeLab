@@ -8,6 +8,14 @@ RKE2，也称为 RKE Government，是 Rancher 的下一代 Kubernetes 发行版�
 
 ### Server节点
 
+设置软连接
+
+```shell
+mkdir -p /home/rancher
+ln -s /home/rancher /var/lib/rancher
+ls -l /var/lib/rancher
+```
+
 1. 安装服务
 
 ```shell
