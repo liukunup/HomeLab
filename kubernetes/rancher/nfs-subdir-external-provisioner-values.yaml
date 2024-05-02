@@ -1,7 +1,5 @@
 image:
-# repository: registry.k8s.io/sig-storage/nfs-subdir-external-provisioner
-# repository: k8s.gcr.io/sig-storage/nfs-subdir-external-provisioner # 已过期
-  repository: liukunup/nfs-subdir-external-provisioner
+  repository: m.daocloud.io/registry.k8s.io/sig-storage/nfs-subdir-external-provisioner  # 使用国内镜像源
   tag: v4.0.2
   pullPolicy: IfNotPresent
 
@@ -9,6 +7,7 @@ nfs:
   # 配置你的NFS共享目录
   server: quts.homelab.com
   path: /Kubernetes/rke2
+# # 默认不使用挂载选项
 # mountOptions:
 #   - nfsvers=4.2
 
