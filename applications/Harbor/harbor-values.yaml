@@ -26,8 +26,8 @@ persistence:
       region: us-west-1
       bucket: registry
       # 请修改AK+SK
-      accesskey: 6IrVCZMqr7rBhtz3YCpw
-      secretkey: aeIYNsIq4p0QlvHsTKW9Cg2gSuyUbvNr9IxtCR0W
+      accesskey: Kuy8dJTLgcSBCRT9AfNJ
+      secretkey: ihJuipvo5MODyGVWMFf6C7yTqjfTHgms9P6X5FsJ
       regionendpoint: "http://minio.harbor.svc.cluster.local:9000"
 
 database:
