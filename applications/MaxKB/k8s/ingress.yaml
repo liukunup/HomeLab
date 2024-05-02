@@ -1,0 +1,19 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: maxkb
+  labels:
+    app: maxkb
+spec:
+  rules:
+  - host: maxkb.homelab.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: maxkb
+            port:
+              number: 8080
