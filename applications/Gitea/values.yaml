@@ -55,10 +55,14 @@ gitea:
       SMTP_ADDR: smtp.163.com
       SMTP_PORT: 587
       USER: liukunbot@163.com
-      PASSWD: xxx # 请修改成你的邮箱&密码
+      PASSWD: changme # 请修改成你的邮箱&密码
     # LFS
     server:
       LFS_START_SERVER: true
+    # Migrations
+    migrations:
+      ALLOWED_DOMAINS: github.com, *.github.com, *.homelab.com
+      ALLOW_LOCALNETWORKS: true
 
 postgresql-ha:
   enabled: true
