@@ -1,0 +1,109 @@
+# see https://github.com/osixia/docker-openldap/blob/master/example/docker-compose.yml
+
+services:
+
+  # OpenLDAP - https://github.com/osixia/docker-openldap
+  openldap:
+    image: osixia/openldap:1.5.0
+    container_name: openldap
+    environment:
+      LDAP_LOG_LEVEL: 256
+      LDAP_ORGANISATION: HomeLab
+      LDAP_DOMAIN: homelab.lan
+      LDAP_BASE_DN: dc=homelab,dc=lan
+      LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD:?admin password required}
+      LDAP_CONFIG_PASSWORD: ${LDAP_CONFIG_PASSWORD:?config password required}
+      LDAP_READONLY_USER: "false"
+      #LDAP_READONLY_USER_USERNAME: "readonly"
+      #LDAP_READONLY_USER_PASSWORD: "readonly"
+      LDAP_RFC2307BIS_SCHEMA: "false"
+      LDAP_BACKEND: "mdb"
+      LDAP_TLS: "true"
+      LDAP_TLS_CRT_FILENAME: "ldap.crt"
+      LDAP_TLS_KEY_FILENAME: "ldap.key"
+      LDAP_TLS_DH_PARAM_FILENAME: "dhparam.pem"
+      LDAP_TLS_CA_CRT_FILENAME: "ca.crt"
+      LDAP_TLS_ENFORCE: "false"
+      LDAP_TLS_CIPHER_SUITE: "SECURE256:-VERS-SSL3.0"
+      LDAP_TLS_VERIFY_CLIENT: "demand"
+      LDAP_REPLICATION: "false"
+      #LDAP_REPLICATION_CONFIG_SYNCPROV: 'binddn="cn=admin,cn=config" bindmethod=simple credentials="$$LDAP_CONFIG_PASSWORD" searchbase="cn=config" type=refreshAndPersist retry="60 +" timeout=1 starttls=critical'
+      #LDAP_REPLICATION_DB_SYNCPROV: 'binddn="cn=admin,$$LDAP_BASE_DN" bindmethod=simple credentials="$$LDAP_ADMIN_PASSWORD" searchbase="$$LDAP_BASE_DN" type=refreshAndPersist interval=00:00:00:10 retry="60 +" timeout=1 starttls=critical'
+      #LDAP_REPLICATION_HOSTS: "#PYTHON2BASH:['ldap://ldap.example.org','ldap://ldap2.example.org']"
+      KEEP_EXISTING_CONFIG: "false"
+      LDAP_REMOVE_CONFIG_AFTER_SETUP: "true"
+      LDAP_SSL_HELPER_PREFIX: "ldap"
+    env_file:
+      - .env
+    tty: true
+    stdin_open: true
+    volumes:
+      - /opt/openldap/ldap:/var/lib/ldap
+      - /opt/openldap/slapd.d:/etc/ldap/slapd.d
+      - /opt/openldap/certs:/container/service/lapd/assets/certs
+    ports:
+      - 389:389
+      - 636:636
+    # For replication to work correctly, domainname and hostname must be
+    # set correctly so that "hostname"."domainname" equates to the
+    # fully-qualified domain name for the host.
+    #domainname: "homelab.lan"
+    #hostname: "ldap"
+    restart: unless-stopped
+
+  # phpLDAPadmin - https://github.com/osixia/docker-phpLDAPadmin
+  phpldapadmin:
+    image: osixia/phpldapadmin:0.9.0
+    container_name: phpldapadmin
+    restart: unless-stopped
+    environment:
+      PHPLDAPADMIN_LDAP_HOSTS: openldap
+      PHPLDAPADMIN_HTTPS: false
+    ports:
+      - 50080:80
+    depends_on:
+      - openldap
+
+  # Self-Service Password - https://github.com/tiredofit/docker-self-service-password
+  # see https://github.com/tiredofit/docker-self-service-password/blob/main/examples/docker-compose.yml
+  ssp-app:
+    image: tiredofit/self-service-password:5.3.3
+    container_name: ssp-app
+    labels:
+      - traefik.enable=true
+      - traefik.frontend.rule=Host:ldap.homelab.lan
+      - traefik.port=80
+      - traefik.protocol=http
+      - traefik.docker.network=proxy
+      - traefik.backend=ssp-app
+    volumes:
+      - /opt/openldap/ssp/htdocs:/www/ssp
+      - /opt/openldap/ssp/logs:/www/logs
+    environment:
+    # LDAP Settings
+      LDAP_SERVER: ldap://openldap:389
+      LDAP_STARTTLS: false
+      LDAP_BINDDN: cn=admin,dc=homelab,dc=lan
+      LDAP_BINDPASS: ${LDAP_ADMIN_PASSWORD:?admin password required}
+      LDAP_BASE_SEARCH: ou=people,dc=homelab,dc=lan
+      LDAP_LOGIN_ATTRIBUTE: uid
+      LDAP_FULLNAME_ATTRIBUTE: cn
+    # LDAP mail attribute
+      LDAP_MAIL_ATTRIBUTE: mail
+    # Who the email should come from
+      MAIL_FROM: ${SMTP_USERNAME:?smtp username required}
+      MAIL_FROM_NAME: "Self Service Password"
+    # Notify users anytime their password is changed
+      NOTIFY_ON_CHANGE: true
+    # PHPMailer configuration (see https://github.com/PHPMailer/PHPMailer)
+      SMTP_DEBUG: 0
+      SMTP_HOST: smtp.163.com
+      SMTP_AUTH_ON: true
+      SMTP_USER: ${SMTP_USERNAME:?smtp username required}
+      SMTP_PASS: ${SMTP_PASSWORD:?smtp password required}
+      SMTP_TIMEOUT: 30
+      SMTP_PORT: 587
+      SMTP_SECURE_TYPE: ssl
+    ports:
+      - 80:80
+    restart: unless-stopped
