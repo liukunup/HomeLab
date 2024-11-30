@@ -11,4 +11,4 @@ docker run -d \
   --restart=always \
   --user=1000:1000 \
   --net=host \
-  jellyfin/jellyfin
+  liukunup/jellyfin:10.10.3

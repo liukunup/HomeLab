@@ -26,7 +26,7 @@ spec:
                       - node1
       containers:
         - name: jellyfin
-          image: liukunup/jellyfin:latest
+          image: liukunup/jellyfin:10.10.3
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8096
