@@ -58,9 +58,15 @@ services:
     restart: unless-stopped
     environment:
       PHPLDAPADMIN_LDAP_HOSTS: openldap
-      PHPLDAPADMIN_HTTPS: false
+      # HTTPS
+      PHPLDAPADMIN_HTTPS: true
+      PHPLDAPADMIN_HTTPS_CA_CRT_FILENAME: ca.crt
+      PHPLDAPADMIN_HTTPS_CRT_FILENAME: phpldapadmin.crt
+      PHPLDAPADMIN_HTTPS_KEY_FILENAME: phpldapadmin.key
+    volumes:
+      - /opt/openldap/certs:/container/service/phpldapadmin/assets/apache2/certs
     ports:
-      - 50080:80
+      - 6443:443
     depends_on:
       - openldap
 

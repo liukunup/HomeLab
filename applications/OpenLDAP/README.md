@@ -97,11 +97,10 @@ vim ssp/htdocs/pages/sendtoken.php
 ```
 
 ```PlainText
-# bugfix
-$method = "http";
-$reset_url = $method."://".$_SERVER['HTTP_HOST'].$script_name;
 # 注释掉下面这一行
-#$reset_url = $method."://".$server_name.$script_name;
+# $reset_url = $method."://".$server_name.$script_name;
+# 修改成如下
+$reset_url = "http://ldap.homelab.lan".$script_name;
 ```
 
 ## 参考文档
