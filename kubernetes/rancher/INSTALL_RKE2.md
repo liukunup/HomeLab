@@ -8,7 +8,7 @@ RKE2，也称为 RKE Government，是 Rancher 的下一代 Kubernetes 发行版�
 
 ### Server节点
 
-设置软连接
+设置软连接(分区不合理的时候采用此方法)
 
 ```shell
 mkdir -p /home/rancher
@@ -37,6 +37,8 @@ journalctl -u rke2-server -f
 
 ```shell
 cat /etc/rancher/rke2/rke2.yaml
+# 或
+scp /etc/rancher/rke2/rke2.yaml username@quts.homelab.lan:/share/HomeLab/
 ```
 
 3. 查看令牌
@@ -45,11 +47,17 @@ cat /etc/rancher/rke2/rke2.yaml
 cat /var/lib/rancher/rke2/server/node-token
 ```
 
-准备好节点接入的配置文件
+准备好节点接入的配置文件(在其他节点上执行)
 
-```yaml
+```shell
+# 创建目录
+mkdir -p /etc/rancher/rke2
+
+# 写入配置文件
+cat > /etc/rancher/rke2/config.yaml <<-EOF
 server: https://<server>:9345
 token: <token from server node>
+EOF
 ```
 
 ### Worker节点
@@ -62,7 +70,7 @@ curl -sfL https://rancher-mirror.rancher.cn/rke2/install.sh | INSTALL_RKE2_MIRRO
 # 使能 Agent 服务
 systemctl enable rke2-agent.service
 
-# 写入上述 Server 的配置信息
+# 写入上述 Server 的配置信息（已完成请忽略）
 mkdir -p /etc/rancher/rke2
 vim /etc/rancher/rke2/config.yaml
 
@@ -73,6 +81,13 @@ journalctl -u rke2-agent -f
 ```
 
 ## 其他后续工作
+
+- 尝试使用一下吧
+
+```shell
+export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
+/var/lib/rancher/rke2/bin/kubectl get nodes
+```
 
 - 修改节点角色名称
 

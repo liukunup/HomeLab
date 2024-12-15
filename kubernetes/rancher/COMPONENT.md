@@ -27,18 +27,18 @@ helm repo add nfs-subdir-external-provisioner https://kubernetes-sigs.github.io/
 helm repo update
 
 # 创建命名空间
-kubectl create namespace provisioner-system
+kubectl create namespace provisioner
 
 # 安装 nfs-subdir-external-provisioner
 helm install nfs-subdir-external-provisioner \
   nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
-  -n provisioner-system \
+  -n provisioner \
   -f nfs-subdir-external-provisioner-values.yaml
 
 # 更新 nfs-subdir-external-provisioner
 helm upgrade nfs-subdir-external-provisioner \
   nfs-subdir-external-provisioner/nfs-subdir-external-provisioner \
-  -n provisioner-system \
+  -n provisioner \
   -f nfs-subdir-external-provisioner-values.yaml
 ```
 
@@ -55,11 +55,9 @@ helm repo add metallb https://metallb.github.io/metallb
 helm repo update
 
 # 创建命名空间
-kubectl create namespace metallb-system
+kubectl create namespace metallb
 # 安装 metallb
-helm install metallb \
-  -n metallb-system \
-  metallb/metallb
+helm install metallb -n metallb metallb/metallb
 # 更新配置
 kubectl apply -f metallb-config.yaml
 ```
@@ -72,7 +70,7 @@ kubectl apply -f metallb-config.yaml
 
 ```shell
 # 安装
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.1/cert-manager.yaml
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.16.2/cert-manager.yaml
 # 查看
 kubectl get pods -n cert-manager
 ```
@@ -179,8 +177,15 @@ helm install cert-manager jetstack/cert-manager \
 ```shell
 helm install rancher rancher-stable/rancher \
   --namespace cattle-system \
-  --set hostname=rancher.homelab.com \
+  --set hostname=rancher.homelab.lan \
+  --set systemDefaultRegistry=reg.homelab.lan \
   --set bootstrapPassword=<password>
 ```
 
-> 在浏览器中打开 https://rancher.homelab.com/dashboard/
+- 卸载`rancher`
+
+```shell
+helm uninstall rancher -n cattle-system
+```
+
+> 在浏览器中打开 https://rancher.homelab.lan/dashboard/

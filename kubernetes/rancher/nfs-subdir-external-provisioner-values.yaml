@@ -5,11 +5,8 @@ image:
 
 nfs:
   # 配置你的NFS共享目录
-  server: quts.homelab.com
-  path: /Kubernetes/rke2
-# # 默认不使用挂载选项
-# mountOptions:
-#   - nfsvers=4.2
+  server: quts.homelab.lan
+  path: /HomeLab/Kubernetes/RKE2
 
 storageClass:
   defaultClass: true
@@ -18,4 +15,4 @@ storageClass:
   provisionerName: nfs-subdir-external-provisioner
 
 nodeSelector:
-  kubernetes.io/hostname: server
+  kubernetes.io/hostname: node1
