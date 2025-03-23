@@ -42,7 +42,8 @@ packages:
   - software-properties-common
 
 runcmd:
-  - apt autoremove -y
-  - apt clean
   - systemctl enable qemu-guest-agent
   - systemctl start qemu-guest-agent
+  # 清理工作
+  - apt autoremove -y
+  - apt clean
