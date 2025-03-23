@@ -1,0 +1,48 @@
+#cloud-config
+
+chpasswd:
+  expire: false
+  users:
+  - {name: root, password: $6$8EUkAsCo3tFHpXpU$5qD47Ycp4eqTVL/fcMgsLqKW9plxBl3hZvPIC1bmDNyDWI83zZKWTeedPPoNRqo.AZlmbR2kYJUtxFOCmIuqg1}
+ssh_pwauth: true
+
+timezone: Asia/Shanghai
+hostname: debian
+
+users:
+  - name: liukunup
+    gecos: LiuKun
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCVfqsj2EzWrJ49sArn3yJ1B2Lm0zEKcVLEU9+PxReULdDiXlyvcdncPqYOdkL8izH5qOHJwnuCAmtKkQvA+rh9G9v+ns7MASOTW6K75bRrBiXx/h4tRZ9G94IlbohRRn7bvoqiCJEypPUqnJcFVASZNBN2vxRT11pyDtsKhB7yAcS74x2DjcSirO7sI02JNJNxmWZERGlibtbRh4Wuwldwxh2z+RHkA4uuE/IzZXlymKO4h27n+dV+z4nppCgzf+L3aC5EPmYC18e0xWBG4VOr2KNaBgCzwquJ8Ymwzc9xghx8sM37NT3uYE5W//CJMLWo2DhsqJhEpi3376N7zodlK6Zt7SjEx2kaPuUZEB9UMGgPw1hSd+JJJTuccJMIe1gUrtNgnr3qnRHTDUZEPMsfp6SvmgFFqmJTfdvE/DctsYEtqdjfaLq8dm4mjE/aFkZVElfmhNQ7Gx/nd2p4vN9ccu7W6JehQ1HFgS8eYWJJ6NjkcI2y6ftlZwC/4kxWYc8= liukunup@163.com
+    passwd: $6$8EUkAsCo3tFHpXpU$5qD47Ycp4eqTVL/fcMgsLqKW9plxBl3hZvPIC1bmDNyDWI83zZKWTeedPPoNRqo.AZlmbR2kYJUtxFOCmIuqg1
+    lock_passwd: false
+
+apt:
+  primary:
+    - arches: [default]
+      uri: https://mirrors.ustc.edu.cn/debian
+  security:
+    - arches: [default]
+      uri: https://mirrors.ustc.edu.cn/debian-security
+
+package_reboot_if_required: true
+package_update: true
+package_upgrade: true
+
+packages:
+  - qemu-guest-agent
+  - vim
+  - curl
+  - wget
+  - git
+  - nfs-common
+  - net-tools
+  - software-properties-common
+
+runcmd:
+  - apt autoremove -y
+  - apt clean
+  - systemctl enable qemu-guest-agent
+  - systemctl start qemu-guest-agent
