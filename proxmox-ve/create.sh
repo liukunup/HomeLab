@@ -76,7 +76,7 @@ ciuser=${ciuser:-root}
 read -p "Enter the SSH public key file for the Cloud-Init (~/.ssh/id_rsa.pub): " sshkeys
 sshkeys=${sshkeys:-"~/.ssh/id_rsa.pub"}
 # 输入自定义 Cloud-Init 配置
-read -p "Enter the custom configuration for the Cloud-Init (e.g. user=QuTS:snippets/user-data.yaml): " cicustom
+read -p "Enter the custom configuration for the Cloud-Init (e.g. user=QuTS:snippets/user-debian.yaml): " cicustom
 cicustom=${cicustom:-""}
 echo
 
