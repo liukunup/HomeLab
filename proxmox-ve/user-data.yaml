@@ -2,8 +2,6 @@
 
 chpasswd:
   expire: false
-  users:
-  - {name: root, password: $6$8EUkAsCo3tFHpXpU$5qD47Ycp4eqTVL/fcMgsLqKW9plxBl3hZvPIC1bmDNyDWI83zZKWTeedPPoNRqo.AZlmbR2kYJUtxFOCmIuqg1}
 ssh_pwauth: true
 
 timezone: Asia/Shanghai
