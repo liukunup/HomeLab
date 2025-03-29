@@ -23,7 +23,7 @@ apt:
       uri: https://mirrors.ustc.edu.cn/ubuntu
   security:
     - arches: [default]
-      uri: https://mirrors.ustc.edu.cn/ubuntu-security
+      uri: https://mirrors.ustc.edu.cn/ubuntu
 
 package_reboot_if_required: true
 package_update: true
