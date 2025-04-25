@@ -51,6 +51,14 @@ mounts:
 runcmd:
   - systemctl enable qemu-guest-agent
   - systemctl start qemu-guest-agent
+  # 配置私有镜像仓库的证书
+  - |
+    mkdir -p /etc/docker/certs.d/reg.homelab.lan
+    cd /etc/docker/certs.d/reg.homelab.lan
+    openssl genrsa -out client.key 4096
+    openssl req -new -x509 -text -key client.key -out client.cert
+    cd ~
+    cp /mnt/workspace/certs/root/ca.crt /etc/docker/certs.d/reg.homelab.lan/ca.crt
   # 清理工作
   - apt autoremove -y
   - apt clean
