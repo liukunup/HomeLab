@@ -11,6 +11,7 @@ curl -sfL https://get.gpustack.ai | sh -s -
 ```
 
 如何获取密码?
+
 ```shell
 cat /var/lib/gpustack/initial_admin_password
 ```
@@ -22,7 +23,8 @@ Invoke-Expression (Invoke-WebRequest -Uri "https://get.gpustack.ai" -UseBasicPar
 ```
 
 如何获取密码?
-```
+
+```powershell
 Get-Content -Path "$env:APPDATA\gpustack\initial_admin_password" -Raw
 ```
 
@@ -44,7 +46,8 @@ docker run -d \
 ```
 
 如何获取密码?
-```
+
+```shell
 docker exec -it gpustack cat /var/lib/gpustack/initial_admin_password
 ```
 
