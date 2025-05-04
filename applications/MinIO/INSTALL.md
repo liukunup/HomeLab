@@ -102,3 +102,47 @@ To access the MinIO&reg; web UI:
 
    http://minio.homelab.com/minio/
 ```
+
+## 通过Docker方式部署
+
+- 准备自签名证书
+
+```plaintext
+└── certs
+    ├── private.key
+    ├── public.crt
+    └── CAs
+        └── intermediate.crt
+```
+
+- 准备配置文件
+
+> config.env
+
+```plaintext
+MINIO_VOLUMES="/mnt/data"
+MINIO_ROOT_USER=user
+MINIO_ROOT_PASSWORD=pass
+MINIO_DOMAIN=minio.homelab.lan
+```
+
+- 拉起容器
+
+```shell
+docker run -d \
+    -p 9000:9000 \
+    -p 9001:9001 \
+    -v /share/Container/minio/data:/mnt/data \
+    -v /share/Container/minio/certs:/opt/minio/certs \
+    -v /share/Container/minio/config.env:/etc/config.env \
+    -e MINIO_CONFIG_ENV_FILE=/etc/config.env \
+    --restart=unless-stopped \
+    --name=minio \
+    minio/minio:RELEASE.2025-04-08T15-41-24Z \
+    server \
+    --address=":9000" \
+    --console-address=":9001" \
+    --ftp="address=:8021" \
+    --ftp="passive-port-range=30000-40000" \
+    --certs-dir="/opt/minio/certs"
+```
