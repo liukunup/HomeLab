@@ -16,6 +16,16 @@ ln -s /home/rancher /var/lib/rancher
 ls -l /var/lib/rancher
 ```
 
+[如何使用自签名证书](https://docs.rke2.io/zh/security/certificates#using-custom-ca-certificates)
+
+> 事先将根CA、中间CA/key拷贝到下面目录里
+
+```shell
+mkdir -p /var/lib/rancher/rke2/server/tls
+cp /etc/ssl/certs/root-ca.pem /etc/ssl/certs/intermediate-ca.pem /etc/ssl/private/intermediate-ca.key /var/lib/rancher/rke2/server/tls
+curl -sL https://github.com/k3s-io/k3s/raw/master/contrib/util/generate-custom-ca-certs.sh | PRODUCT=rke2 bash - 
+```
+
 1. 安装服务
 
 ```shell
@@ -55,8 +65,8 @@ mkdir -p /etc/rancher/rke2
 
 # 写入配置文件
 cat > /etc/rancher/rke2/config.yaml <<-EOF
-server: https://<server>:9345
-token: <token from server node>
+server: https://192.168.100.50:9345
+token: K104fea62665b239674072c7491155028e7eb745fae0a0d428568f17d3764a2a77a::server:f00bf9d4369f87f66915613853d100c4
 EOF
 ```
 
