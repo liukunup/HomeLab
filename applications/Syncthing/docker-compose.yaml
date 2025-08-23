@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  syncthing:
+    image: syncthing/syncthing:latest
+    container_name: syncthing
+    hostname: syncthing
+    restart: unless-stopped
+    ports:
+      - "8384:8384"       # Web GUI
+      - "22000:22000/tcp" # Sync TCP
+      - "22000:22000/udp" # Sync UDP
+      - "21027:21027/udp" # Discovery
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - /path/to/your/config:/var/syncthing
+      - /path/to/your/data/folder1:/var/syncthing/Sync
