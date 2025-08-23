@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: always
+    ports:
+      - "443:443" # 映射 HTTPS 端口
+    environment:
+      # 管理员令牌：用于访问 /admin 管理后台，请务必修改成一个非常复杂的长随机字符串
+      # 生成命令：openssl rand -base64 48
+      ADMIN_TOKEN: "your_super_long_random_and_secure_admin_token_here"
+      # 数据库连接：使用 SQLite 简单高效，对于大多数用户足够
+      DATABASE_URL: "/data/db.sqlite3"
+      # 网站域名：必须设置为您的域名，否则注册等功能会出错
+      DOMAIN: "https://vault.your-domain.com"
+      # 启用注册（可选）：生产环境建议关闭，手动邀请用户或通过管理后台添加
+      SIGNUPS_ALLOWED: "false"
+      # 邀请码（可选）：如果 SIGNUPS_ALLOWED 为 true，强烈建议启用
+      # INVITATIONS_ALLOWED: "true"
+      # 其他配置：如邮件服务器设置（用于通知、2FA等）
+      # SMTP_HOST: "smtp.gmail.com"
+      # SMTP_FROM: "your-email@gmail.com"
+      # SMTP_PORT: 587
+      # SMTP_SSL: "true"
+      # SMTP_USERNAME: "your-email@gmail.com"
+      # SMTP_PASSWORD: "your-app-password" # 注意使用应用专用密码，非邮箱登录密码
+    volumes:
+      - ./data:/data # 持久化数据
+      - ./logs:/logs # (可选) 持久化日志
+      - ./ssl:/ssl/:ro # 挂载 SSL 证书目录，只读
+    # 使用自定义网络（可选，但更佳）
+    networks:
+      - vaultwarden-net
+
+# 定义网络（可选）
+networks:
+  vaultwarden-net:
+    driver: bridge
