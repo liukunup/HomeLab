@@ -1,0 +1,41 @@
+global:
+  imageRegistry: docker.io
+
+image:
+  registry: docker.io
+
+## Authentication
+## @param auth.username ClickHouse Admin username
+## @param auth.password ClickHouse Admin password
+##
+auth:
+  username: admin
+  password: 123456
+
+keeper:
+  enabled: true
+
+ingress:
+  ## If true, ClickHouse server Ingress will be created
+  ##
+  enabled: true
+
+  ## ClickHouse server Ingress annotations
+  ##
+  annotations: {}
+  #   kubernetes.io/ingress.class: nginx
+  #   kubernetes.io/tls-acme: 'true'
+
+  ## ClickHouse server Ingress hostnames
+  ## Must be provided if Ingress is enabled
+  ##
+  hosts:
+    - clickhouse.domain.com
+
+  ## ClickHouse server Ingress TLS configuration
+  ## Secrets must be manually created in the namespace
+  ##
+  tls:
+    - secretName: clickhouse-server-tls
+      hosts:
+        - clickhouse.domain.com
