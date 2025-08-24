@@ -1,5 +1,9 @@
 version: "3"
 
+volumes:
+  syncthing-config:
+  syncthing-data:
+
 services:
   syncthing:
     image: syncthing/syncthing:latest
@@ -12,8 +16,10 @@ services:
       - "22000:22000/udp" # Sync UDP
       - "21027:21027/udp" # Discovery
     environment:
+      - TZ=Asia/Shanghai
+      - LANG=en_US.UTF-8
       - PUID=1000
       - PGID=1000
     volumes:
-      - /path/to/your/config:/var/syncthing
-      - /path/to/your/data/folder1:/var/syncthing/Sync
+      - syncthing-config:/var/syncthing
+      - syncthing-data:/var/syncthing/data

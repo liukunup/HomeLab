@@ -1,33 +1,29 @@
 # Syncthing
 
+## 如何部署
+
+1. 在宿主机上运行 id $USER 查看你的 UID 和 GID。
+
+```shell
+id $USER
+```
+
+2. 在 docker-compose.yml 中设置 PUID 和 PGID。
+
+3. 部署
+
+```shell
 # 拉取最新的镜像
 docker-compose pull
-# 重新创建并启动容器
-docker-compose up -d
 
-# 查看日志
-docker-compose logs -f
+# 重新创建并启动容器
+docker-compose -f docker-compose.yaml -p syncthing-infra up -d
 
 # 停止服务
 docker-compose down
+```
 
-# 清理旧的镜像
-docker image prune
-
-
-# 停止并删除旧容器
-docker stop syncthing
-docker rm syncthing
-# 然后重新运行本文开头的 `docker run ...` 命令，它会自动拉取最新镜像。
-
-
-
-重要提示和配置步骤
-权限问题：如果遇到文件权限错误（例如，容器内进程没有权限写入挂载的目录），请确保目录对于 Docker 容器是可写的。使用 PUID 和 PGID 环境变量是一种好习惯，它们让容器以指定的非 root 用户运行，与你宿主机上的用户权限匹配。
-
-在宿主机上运行 id $USER 查看你的 UID 和 GID。
-
-在 docker-compose.yml 中设置 PUID 和 PGID。
+## 如何配置
 
 初始设置：
 

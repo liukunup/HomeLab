@@ -12,7 +12,7 @@ services:
     container_name: syncthing-discovery-server
     hostname: discosrv
     restart: unless-stopped
-    command: -listen=":8443"
+    command: --listen=":8443"
     ports:
       - "8443:8443"
     environment:
