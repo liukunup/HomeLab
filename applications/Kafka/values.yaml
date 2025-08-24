@@ -1,0 +1,65 @@
+# kafka-values.yaml
+
+# 全局配置，会影响到 Kafka 和其内嵌的 Zookeeper
+global:
+  # 存储类：根据你的集群环境设置，例如 'standard', 'gp2', 或 null（使用默认存储类）
+  storageClass: "standard"
+
+# Kafka 配置
+image:
+  registry: docker.io
+  repository: bitnami/kafka
+  tag: 3.7.0-debian-12-r0 # 建议指定最新版本
+
+# Kafka 服务配置
+service:
+  type: ClusterIP # 对于集群内访问，生产环境可能需要 NodePort 或 LoadBalancer 供外部访问
+  # 如果需要从外部访问，取消注释并修改以下配置
+  # type: LoadBalancer
+  # loadBalancerIP: <your-static-ip> # (云提供商适用)
+  ports:
+    - name: external
+      port: 9094
+      nodePort: 30094 # 如果 service.type 是 NodePort
+
+# Kafka 副本数（Broker 节点数）
+replicaCount: 3
+
+# Kafka 持久化配置
+persistence:
+  enabled: true
+  accessModes:
+    - ReadWriteOnce
+  size: 8Gi # 根据需求调整存储大小
+  # storageClass: "standard" # 如果已在 global 中设置，此处可省略
+
+# Kafka 配置：允许外部访问（PLAINTEXT）
+externalAccess:
+  enabled: false # 如果要从集群外部访问，设置为 true
+  autoDiscovery:
+    enabled: true
+  service:
+    type: NodePort
+    # 或者使用 LoadBalancer
+    # type: LoadBalancer
+
+# 认证配置（生产环境强烈建议启用）
+auth:
+  # 客户端 Broker 通信认证
+  clientProtocol: "plaintext" # 可选: plaintext, sasl, mtls, sasl_tls
+  interBrokerProtocol: "plaintext"
+  # SASL 认证（如果 protocol 选择了 sasl）
+  # saslMechanism: "scram-sha-512"
+  # jaas:
+  #   clientUser: "user"
+  #   clientPassword: "password"
+  #   interBrokerUser: "admin"
+  #   interBrokerPassword: "adminpassword"
+
+# 内置 Zookeeper 的配置（通常保持默认即可）
+zookeeper:
+  enabled: true
+  replicaCount: 3
+  persistence:
+    enabled: true
+    size: 8Gi
