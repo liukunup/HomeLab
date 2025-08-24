@@ -22,6 +22,7 @@ set -euo pipefail
 # Set default directories if not provided
 CONFIG_DIR="${CONFIG_DIR:-./config}"
 DATA_DIR="${DATA_DIR:-./data}"
+REGISTRY="${REGISTRY:-docker.io}"
 
 echo "=== Syncthing Docker Container Deployment ==="
 echo ""
@@ -67,7 +68,7 @@ docker run -d \
   -v "${CONFIG_DIR}:/var/syncthing" \
   -v "${DATA_DIR}:/var/syncthing/Sync" \
   --restart unless-stopped \
-  syncthing/syncthing:latest
+  "${REGISTRY}/syncthing/syncthing:latest"
 
 echo ""
 echo "✅ Deployment completed successfully!"
