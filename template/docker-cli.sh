@@ -13,6 +13,7 @@
 # Environment Variables:
 #   CONFIG_DIR - Path to Syncthing configuration directory (default: ./config)
 #   DATA_DIR   - Path to data synchronization directory (default: ./data)
+#   REGISTRY   - Docker registry (default: docker.io)
 #
 # Example:
 #   CONFIG_DIR=/mnt/syncthing/config DATA_DIR=/mnt/syncthing/data ./docker-cli.sh
