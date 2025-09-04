@@ -1,0 +1,90 @@
+version: '3'
+
+services:
+  etcd1:
+    image: bitnami/etcd:latest
+    container_name: etcd1
+    environment:
+      # 核心集群配置
+      - ETCD_NAME=etcd1
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster-tls-1
+      - ETCD_INITIAL_CLUSTER=etcd1=https://etcd1:2380,etcd2=https://etcd2:2380,etcd3=https://etcd3:2380
+      - ETCD_INITIAL_CLUSTER_STATE=new
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=https://etcd1:2380
+      - ETCD_ADVERTISE_CLIENT_URLS=https://etcd1:2379
+      # TLS 服务器端配置 (监听)
+      - ETCD_LISTEN_PEER_URLS=https://0.0.0.0:2380
+      - ETCD_LISTEN_CLIENT_URLS=https://0.0.0.0:2379
+      # TLS 证书配置 - 服务器端
+      - ETCD_CERT_FILE=/certs/server.pem
+      - ETCD_KEY_FILE=/certs/server.key
+      - ETCD_TRUSTED_CA_FILE=/certs/ca.pem
+      - ETCD_CLIENT_CERT_AUTH=true # 强制要求客户端提供证书
+      # TLS 证书配置 - Peer端 (节点间通信)
+      - ETCD_PEER_CERT_FILE=/certs/server.pem   # 也可使用专门的peer证书
+      - ETCD_PEER_KEY_FILE=/certs/server.key
+      - ETCD_PEER_TRUSTED_CA_FILE=/certs/ca.pem
+      - ETCD_PEER_CLIENT_CERT_AUTH=true         # 强制要求对等节点提供证书
+    volumes:
+      - ./etcd1/data:/bitnami/etcd/data
+      - ./certs:/certs:ro
+    networks:
+      - etcd
+    ports:
+      - "2379:2379" # 暴露一个节点端口供外部客户端（如etcdctl）访问
+
+  etcd2:
+    image: bitnami/etcd:latest
+    container_name: etcd2
+    environment:
+      - ETCD_NAME=etcd2
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster-tls-1
+      - ETCD_INITIAL_CLUSTER=etcd1=https://etcd1:2380,etcd2=https://etcd2:2380,etcd3=https://etcd3:2380
+      - ETCD_INITIAL_CLUSTER_STATE=new
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=https://etcd2:2380
+      - ETCD_ADVERTISE_CLIENT_URLS=https://etcd2:2379
+      - ETCD_LISTEN_PEER_URLS=https://0.0.0.0:2380
+      - ETCD_LISTEN_CLIENT_URLS=https://0.0.0.0:2379
+      - ETCD_CERT_FILE=/certs/server.pem
+      - ETCD_KEY_FILE=/certs/server.key
+      - ETCD_TRUSTED_CA_FILE=/certs/ca.pem
+      - ETCD_CLIENT_CERT_AUTH=true
+      - ETCD_PEER_CERT_FILE=/certs/server.pem
+      - ETCD_PEER_KEY_FILE=/certs/server.key
+      - ETCD_PEER_TRUSTED_CA_FILE=/certs/ca.pem
+      - ETCD_PEER_CLIENT_CERT_AUTH=true
+    volumes:
+      - ./etcd2/data:/bitnami/etcd/data
+      - ./certs:/certs:ro
+    networks:
+      - etcd
+
+  etcd3:
+    image: bitnami/etcd:latest
+    container_name: etcd3
+    environment:
+      - ETCD_NAME=etcd3
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster-tls-1
+      - ETCD_INITIAL_CLUSTER=etcd1=https://etcd1:2380,etcd2=https://etcd2:2380,etcd3=https://etcd3:2380
+      - ETCD_INITIAL_CLUSTER_STATE=new
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=https://etcd3:2380
+      - ETCD_ADVERTISE_CLIENT_URLS=https://etcd3:2379
+      - ETCD_LISTEN_PEER_URLS=https://0.0.0.0:2380
+      - ETCD_LISTEN_CLIENT_URLS=https://0.0.0.0:2379
+      - ETCD_CERT_FILE=/certs/server.pem
+      - ETCD_KEY_FILE=/certs/server.key
+      - ETCD_TRUSTED_CA_FILE=/certs/ca.pem
+      - ETCD_CLIENT_CERT_AUTH=true
+      - ETCD_PEER_CERT_FILE=/certs/server.pem
+      - ETCD_PEER_KEY_FILE=/certs/server.key
+      - ETCD_PEER_TRUSTED_CA_FILE=/certs/ca.pem
+      - ETCD_PEER_CLIENT_CERT_AUTH=true
+    volumes:
+      - ./etcd3/data:/bitnami/etcd/data
+      - ./certs:/certs:ro
+    networks:
+      - etcd
+
+networks:
+  etcd:
+    name: etcd-cluster
