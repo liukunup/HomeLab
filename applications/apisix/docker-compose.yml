@@ -1,0 +1,62 @@
+version: '3.8'
+
+networks:
+  apisix:
+    driver: bridge
+
+services:
+
+  apisix:
+    image: apache/apisix:${APISIX_VERSION:-3.13.0-debian}
+    container_name: apisix
+    restart: unless-stopped
+    ports:
+      - "${APISIX_HTTP_PORT:-9080}:9080"
+      - "${APISIX_HTTPS_PORT:-9443}:9443"
+      - "${APISIX_METRICS_PORT:-9091}:9091"
+    environment:
+      APISIX_API_KEY: ${APISIX_API_KEY:-edd1c9f034335f136f87ad84b625c8f1}
+    volumes:
+      - ./apisix/config/config.yaml:/usr/local/apisix/conf/config.yaml:ro
+    depends_on:
+      - etcd
+    networks:
+      - apisix-net
+
+  apisix-dashboard:
+    image: apache/apisix-dashboard:${APISIX_DASHBOARD_VERSION:-3.0.1-alpine}
+    container_name: apisix-dashboard
+    restart: unless-stopped
+    ports:
+      - "${APISIX_DASHBOARD_PORT:-9000}:9000"
+    environment:
+      APISIX_DASHBOARD_CONF_ETCD_ENDPOINTS: http://etcd:2379
+      APISIX_DASHBOARD_CONF_LISTEN_PORT: 9000
+      APISIX_DASHBOARD_CONF_CONF_EXPIRE_TIME: 3600
+      APISIX_API_KEY: ${APISIX_API_KEY:-edd1c9f034335f136f87ad84b625c8f1}
+    volumes:
+      - ./apisix/dashboard:/usr/local/apisix-dashboard/storage
+    depends_on:
+      - etcd
+      - apisix
+    networks:
+      - apisix-net
+
+  etcd:
+    image: bitnami/etcd:${ETCD_VERSION:-latest}
+    container_name: apisix-etcd
+    environment:
+      ETCD_ROOT_USER: ${ETCD_ROOT_USER:-root}
+      ETCD_ROOT_PASSWORD: ${ETCD_ROOT_PASSWORD:-Changeit}
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd:2379
+      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+      ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
+      ETCD_NAME: etcd-single
+      ETCD_DATA_DIR: /bitnami/etcd/data
+    ports:
+      - "${ETCD_CLIENT_PORT:-2379}:2379"
+      - "${ETCD_PEER_PORT:-2380}:2380"
+    volumes:
+      - ./etcd/data:/bitnami/etcd/data
+    networks:
+      - apisix-net

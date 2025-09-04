@@ -1,0 +1,35 @@
+apisix:
+  node_listen:
+    port: 9080
+  allow_admin: []
+  admin_key:
+    - name: "admin"
+      key: ${APISIX_API_KEY}
+      role: admin
+
+deployment:
+  role: data_plane
+  role_data_plane:
+    config_provider: etcd
+  etcd:
+    host:
+      - "http://etcd:2379"
+    prefix: "/apisix"
+    username: ${ETCD_ROOT_USER}
+    password: ${ETCD_ROOT_PASSWORD}
+
+plugins:
+  - http-logger
+  - limit-req
+  - prometheus
+  - key-auth
+  - jwt-auth
+  - cors
+  - proxy-rewrite
+  - redirect
+
+plugin_attr:
+  prometheus:
+    export_addr:
+      ip: "0.0.0.0"
+      port: 9091
