@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+
+  iventoy:
+    image: ziggyds/iventoy:latest
+    container_name: iventoy
+    restart: unless-stopped
+    privileged: true
+    ports:
+      - 26000:26000
+      - 16000:16000
+      - 10809:10809
+      - 67:67/udp
+      - 69:69/udp
+    volumes:
+      - /vol1/1000/Docker/iventoy/data:/app/data 
+      - /vol1/1000/Docker/iventoy/user:/app/user
+      - /vol1/1000/Docker/iventoy/iso:/app/iso
+      - /vol1/1000/Docker/iventoy/log:/app/log
+    environment:
+      - AUTO_START_PXE=true
