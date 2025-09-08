@@ -2,7 +2,7 @@
 #
 # Script Name: docker-cli.sh
 # Description: Standard template for deploying Docker containers with common features.
-#              Supports SSL, volume mapping, environment variables, and health checks.
+#              Supports SSL, port mapping, volume mapping, and environment variables.
 # Author: [Your Name] <[your.email@example.com]>
 # Version: 1.0.0
 # Created: $(date +%Y-%m-%d)
@@ -31,38 +31,31 @@ set -euo pipefail
 
 # Container configuration
 CONTAINER_NAME="${CONTAINER_NAME:-my-container}"  # Name of the Docker container
+REGISTRY="${REGISTRY:-docker.io}"                 # Docker registry
 IMAGE_NAME="${IMAGE_NAME:-my-image}"              # Docker image name
 IMAGE_TAG="${IMAGE_TAG:-latest}"                  # Docker image tag
-REGISTRY="${REGISTRY:-docker.io}"                 # Docker registry
 
 # Network configuration
-PORTS="${PORTS:-}"                                # Port mappings (e.g., "8080:80 8443:443")
+EXTRA_PORTS="${EXTRA_PORTS:-}"                    # Port mappings (e.g., "8080:80 8443:443")
 NETWORK="${NETWORK:-}"                            # Docker network name
 HOSTNAME="${HOSTNAME:-}"                          # Container hostname
 
 # Volume configuration
-VOLUMES="${VOLUMES:-}"                            # Volume mappings (e.g., "./data:/app/data")
+EXTRA_VOLUMES="${EXTRA_VOLUMES:-}"                # Volume mappings (e.g., "./data:/app/data")
 DATA_DIR="${DATA_DIR:-./data}"                    # Default data directory
 CONFIG_DIR="${CONFIG_DIR:-./config}"              # Default config directory
 
 # SSL configuration
 SSL_ENABLED="${SSL_ENABLED:-false}"               # Enable SSL certificate generation
 CERTS_DIR="${CERTS_DIR:-./certs}"                 # SSL certificates directory
-SSL_SUBJECT="${SSL_SUBJECT:-/C=CN/ST=Beijing/L=Beijing/O=MyOrg/CN=localhost}"
+SSL_SUBJECT="${SSL_SUBJECT:-/C=CN/ST=Guangdong/L=Shenzhen/O=MyOrg/CN=localhost}"
 
 # Environment variables (comma-separated KEY=VALUE pairs)
-ENV_VARS="${ENV_VARS:-}"
+EXTRA_ENV_VARS="${EXTRA_ENV_VARS:-}"
 
 # Container options
 RESTART_POLICY="${RESTART_POLICY:-unless-stopped}" # Docker restart policy
 EXTRA_OPTIONS="${EXTRA_OPTIONS:-}"                 # Extra Docker options
-
-# Health check configuration
-HEALTHCHECK_ENABLED="${HEALTHCHECK_ENABLED:-true}" # Enable health check
-HEALTHCHECK_CMD="${HEALTHCHECK_CMD:-}"             # Custom health check command
-HEALTHCHECK_INTERVAL="${HEALTHCHECK_INTERVAL:-30}" # Health check interval in seconds
-HEALTHCHECK_TIMEOUT="${HEALTHCHECK_TIMEOUT:-10}"   # Health check timeout in seconds
-HEALTHCHECK_RETRIES="${HEALTHCHECK_RETRIES:-3}"    # Health check retries
 
 ###############################################################################
 #                             INTERNAL VARIABLES                              #
@@ -88,44 +81,34 @@ DRY_RUN="${DRY_RUN:-false}"
 #                               FUNCTIONS                                     #
 ###############################################################################
 
-# Print colored output
-print_status() {
+log() {
     local color=$1
     local message=$2
     echo -e "${color}[$(date '+%Y-%m-%d %H:%M:%S')] ${message}${NC}"
 }
 
-# Print info message
 info() {
-    print_status "${BLUE}" "INFO: $1"
+    log "${BLUE}" "INFO: $1"
 }
 
-# Print success message
 success() {
-    print_status "${GREEN}" "SUCCESS: $1"
+    log "${GREEN}" "SUCCESS: $1"
 }
 
-# Print warning message
 warning() {
-    print_status "${YELLOW}" "WARNING: $1"
+    log "${YELLOW}" "WARNING: $1"
 }
 
-# Print error message and exit
 error() {
-    print_status "${RED}" "ERROR: $1"
+    log "${RED}" "ERROR: $1"
     exit 1
 }
 
 # Debug output (only shown when DEBUG=true)
 debug() {
     if [[ "${DEBUG}" == "true" ]]; then
-        print_status "${YELLOW}" "DEBUG: $1"
+        log "${YELLOW}" "DEBUG: $1"
     fi
-}
-
-# Check if command exists
-command_exists() {
-    command -v "$1" >/dev/null 2>&1
 }
 
 # Show usage information
@@ -145,20 +128,15 @@ Environment Variables:
   CONTAINER_NAME    Name of the Docker container
   IMAGE_NAME        Docker image name
   IMAGE_TAG         Docker image tag
-  PORTS             Port mappings (space-separated)
-  VOLUMES           Volume mappings (space-separated)
+  EXTRA_PORTS       Extra port mappings (space-separated)
+  EXTRA_VOLUMES     Extra volume mappings (space-separated)
+  EXTRA_ENV_VARS    Extra environment variables (comma-separated KEY=VALUE pairs)
   SSL_ENABLED       Enable SSL (true/false)
-  ENV_VARS          Environment variables (comma-separated KEY=VALUE pairs)
 
 Example:
   CONTAINER_NAME=myapp IMAGE_NAME=nginx IMAGE_TAG=alpine PORTS="8080:80" ${SCRIPT_NAME}
   ${SCRIPT_NAME} --dry-run
 EOF
-}
-
-# Show version information
-show_version() {
-    echo "${SCRIPT_NAME} v${VERSION}"
 }
 
 # Parse command line arguments
@@ -170,7 +148,7 @@ parse_arguments() {
                 exit 0
                 ;;
             -v|--version)
-                show_version
+                echo "${SCRIPT_NAME} v${VERSION}"
                 exit 0
                 ;;
             -d|--debug)
@@ -197,7 +175,7 @@ validate_dependencies() {
     fi
 
     for dep in "${deps[@]}"; do
-        if ! command_exists "${dep}"; then
+        if ! command -v "${dep}" >/dev/null 2>&1; then
             error "${dep} is required but not installed"
         fi
     done
@@ -305,9 +283,9 @@ remove_existing_container() {
 build_docker_command() {
     local cmd="docker run -d --name=${CONTAINER_NAME}"
 
-    # Add port mappings
-    if [[ -n "${PORTS}" ]]; then
-        for port in ${PORTS}; do
+    # Add extra port mappings
+    if [[ -n "${EXTRA_PORTS}" ]]; then
+        for port in ${EXTRA_PORTS}; do
             cmd+=" -p ${port}"
         done
     fi
@@ -322,17 +300,17 @@ build_docker_command() {
         cmd+=" --hostname=${HOSTNAME}"
     fi
 
-    # Add volume mappings
-    if [[ -n "${VOLUMES}" ]]; then
-        for volume in ${VOLUMES}; do
+    # Add extra volume mappings
+    if [[ -n "${EXTRA_VOLUMES}" ]]; then
+        for volume in ${EXTRA_VOLUMES}; do
             cmd+=" -v ${volume}"
         done
     fi
 
-    # Add environment variables
-    if [[ -n "${ENV_VARS}" ]]; then
-        IFS=',' read -ra env_array <<< "${ENV_VARS}"
-        for env_var in "${env_array[@]}"; do
+    # Add extra environment variables
+    if [[ -n "${EXTRA_ENV_VARS}" ]]; then
+        IFS=',' read -ra extra_env_array <<< "${EXTRA_ENV_VARS}"
+        for env_var in "${extra_env_array[@]}"; do
             cmd+=" -e ${env_var}"
         done
     fi
@@ -356,36 +334,6 @@ build_docker_command() {
     cmd+=" ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
 
     echo "${cmd}"
-}
-
-# Wait for container to be healthy
-wait_for_container() {
-    local max_attempts=30
-    local attempt=1
-
-    info "Waiting for container to be ready..."
-    
-    if [[ "${DRY_RUN}" == "true" ]]; then
-        info "Would wait for container readiness (dry run)"
-        return 0
-    fi
-
-    while [[ $attempt -le $max_attempts ]]; do
-        if docker ps --filter "name=${CONTAINER_NAME}" --filter "health=healthy" --format "{{.Names}}" | grep -q "^${CONTAINER_NAME}$"; then
-            success "Container is healthy"
-            return 0
-        fi
-
-        if ! docker ps --filter "name=${CONTAINER_NAME}" --format "{{.Names}}" | grep -q "^${CONTAINER_NAME}$"; then
-            error "Container ${CONTAINER_NAME} is not running"
-        fi
-
-        debug "Attempt $attempt/$max_attempts: Container not ready yet..."
-        sleep 2
-        attempt=$((attempt + 1))
-    done
-
-    error "Container did not become healthy within $((max_attempts * 2)) seconds"
 }
 
 # Verify container deployment
@@ -414,7 +362,7 @@ Image:         ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
 Status:        $(if [[ "${DRY_RUN}" == "true" ]]; then echo "DRY RUN"; else echo "DEPLOYED"; fi)
 
 Network:
-  Ports:       ${PORTS:-None}
+  Ports:       ${EXTRA_PORTS:-None}
   Network:     ${NETWORK:-default}
   Hostname:    ${HOSTNAME:-auto}
 
@@ -473,7 +421,10 @@ main() {
             error "Failed to start container"
         }
         
-        wait_for_container
+        # Wait for container to start
+        echo "Waiting for ${CONTAINER_NAME} to start..."
+        sleep 10
+
         verify_deployment
     fi
 
