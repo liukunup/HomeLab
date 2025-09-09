@@ -23,3 +23,14 @@ helm upgrade --install authentik authentik/authentik -f values.yaml
 ## Accessing authentik
 
 After the installation is complete, access authentik at `https://<ingress-host-name>/if/flow/initial-setup/`. Here, you can set a password for the default `akadmin` user.
+
+
+mkdir -p media certs custom-templates
+
+ldapsearch \
+  -x \
+  -H ldap://<ip>:389 \
+  -D 'cn=<username>,ou=users,DC=ldap,DC=goauthentik,DC=io' \
+  -w '<password>' \
+  -b 'DC=ldap,DC=goauthentik,DC=io' \
+  '(objectClass=user)'
