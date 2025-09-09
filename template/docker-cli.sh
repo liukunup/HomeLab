@@ -36,26 +36,29 @@ IMAGE_NAME="${IMAGE_NAME:-my-image}"              # Docker image name
 IMAGE_TAG="${IMAGE_TAG:-latest}"                  # Docker image tag
 
 # Network configuration
-EXTRA_PORTS="${EXTRA_PORTS:-}"                    # Port mappings (e.g., "8080:80 8443:443")
-NETWORK="${NETWORK:-}"                            # Docker network name
-HOSTNAME="${HOSTNAME:-}"                          # Container hostname
+PORTS="${PORTS:-}"                                # Port mappings (e.g., "8080:80 8443:443")
+NETWORK="${NETWORK:-}"                            # Container network name
+CONTAINER_HOSTNAME="${CONTAINER_HOSTNAME:-}"      # Container hostname
 
 # Volume configuration
-EXTRA_VOLUMES="${EXTRA_VOLUMES:-}"                # Volume mappings (e.g., "./data:/app/data")
+VOLUMES="${VOLUMES:-}"                            # Volume mappings (e.g., "./data:/app/data ./config:/app/config")
 DATA_DIR="${DATA_DIR:-./data}"                    # Default data directory
 CONFIG_DIR="${CONFIG_DIR:-./config}"              # Default config directory
 
 # SSL configuration
 SSL_ENABLED="${SSL_ENABLED:-false}"               # Enable SSL certificate generation
 CERTS_DIR="${CERTS_DIR:-./certs}"                 # SSL certificates directory
-SSL_SUBJECT="${SSL_SUBJECT:-/C=CN/ST=Guangdong/L=Shenzhen/O=MyOrg/CN=localhost}"
+SSL_SUBJECT="${SSL_SUBJECT:-/C=CN/ST=Beijing/L=Beijing/O=MyOrg/CN=localhost}"
 
 # Environment variables (comma-separated KEY=VALUE pairs)
-EXTRA_ENV_VARS="${EXTRA_ENV_VARS:-}"
+ENV_VARS="${ENV_VARS:-}"
 
 # Container options
 RESTART_POLICY="${RESTART_POLICY:-unless-stopped}" # Docker restart policy
 EXTRA_OPTIONS="${EXTRA_OPTIONS:-}"                 # Extra Docker options
+
+# Container command
+COMMAND="${COMMAND:-}"                             # Docker command
 
 ###############################################################################
 #                             INTERNAL VARIABLES                              #
@@ -128,9 +131,9 @@ Environment Variables:
   CONTAINER_NAME    Name of the Docker container
   IMAGE_NAME        Docker image name
   IMAGE_TAG         Docker image tag
-  EXTRA_PORTS       Extra port mappings (space-separated)
-  EXTRA_VOLUMES     Extra volume mappings (space-separated)
-  EXTRA_ENV_VARS    Extra environment variables (comma-separated KEY=VALUE pairs)
+  PORTS             Port mappings (space-separated)
+  VOLUMES           Volume mappings (space-separated)
+  ENV_VARS          Environment variables (comma-separated KEY=VALUE pairs)
   SSL_ENABLED       Enable SSL (true/false)
 
 Example:
@@ -283,9 +286,9 @@ remove_existing_container() {
 build_docker_command() {
     local cmd="docker run -d --name=${CONTAINER_NAME}"
 
-    # Add extra port mappings
-    if [[ -n "${EXTRA_PORTS}" ]]; then
-        for port in ${EXTRA_PORTS}; do
+    # Add port mappings
+    if [[ -n "${PORTS}" ]]; then
+        for port in ${PORTS}; do
             cmd+=" -p ${port}"
         done
     fi
@@ -296,21 +299,21 @@ build_docker_command() {
     fi
 
     # Add hostname
-    if [[ -n "${HOSTNAME}" ]]; then
-        cmd+=" --hostname=${HOSTNAME}"
+    if [[ -n "${CONTAINER_HOSTNAME}" ]]; then
+        cmd+=" --hostname=${CONTAINER_HOSTNAME}"
     fi
 
-    # Add extra volume mappings
-    if [[ -n "${EXTRA_VOLUMES}" ]]; then
-        for volume in ${EXTRA_VOLUMES}; do
+    # Add volume mappings
+    if [[ -n "${VOLUMES}" ]]; then
+        for volume in ${VOLUMES}; do
             cmd+=" -v ${volume}"
         done
     fi
 
-    # Add extra environment variables
-    if [[ -n "${EXTRA_ENV_VARS}" ]]; then
-        IFS=',' read -ra extra_env_array <<< "${EXTRA_ENV_VARS}"
-        for env_var in "${extra_env_array[@]}"; do
+    # Add environment variables
+    if [[ -n "${ENV_VARS}" ]]; then
+        IFS=',' read -ra env_array <<< "${ENV_VARS}"
+        for env_var in "${env_array[@]}"; do
             cmd+=" -e ${env_var}"
         done
     fi
@@ -332,6 +335,11 @@ build_docker_command() {
 
     # Add image
     cmd+=" ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+
+    # Add command
+    if [[ -n "${COMMAND}" ]]; then
+        cmd+=" ${COMMAND}"
+    fi
 
     echo "${cmd}"
 }
@@ -362,9 +370,9 @@ Image:         ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
 Status:        $(if [[ "${DRY_RUN}" == "true" ]]; then echo "DRY RUN"; else echo "DEPLOYED"; fi)
 
 Network:
-  Ports:       ${EXTRA_PORTS:-None}
+  Ports:       ${PORTS:-None}
   Network:     ${NETWORK:-default}
-  Hostname:    ${HOSTNAME:-auto}
+  Hostname:    ${CONTAINER_HOSTNAME:-auto}
 
 Volumes:
   Data:        ${DATA_DIR}
