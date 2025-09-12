@@ -51,9 +51,8 @@
 | 名称 | 域名 | IP地址 | 端口 | 部署在哪里 | 备注 |
 | ---- | ---- | ---- | ---- | ---- | ---- |
 | StandBy               | standby.homelab.lan      | 192.168.100.81  | 12345     | Mini Router | 1Panel |
-| OpenLDAP              | openldap.homelab.lan     | 192.168.100.81  | 389/636   | StandBy     | LDAP Server |
-| phpLDAPadmin          | phpldapadmin.homelab.lan | 192.168.100.81  | 11443     | StandBy     | LDAP 管理页 |
-| Self-Service Password | ssp.homelab.lan          | 192.168.100.81  | 11081     | StandBy     | LDAP 密码自助服务 |
+| authentik             | authentik.homelab.lan    | 192.168.100.81  | 9000/9443 | StandBy     | 身份提供与验证 |
+| LDAP                  | ldap.homelab.lan         | 192.168.100.81  | 389/636   | StandBy     | authentik ldap 端点 |
 | JumpServer            | jumpserver.homelab.lan   | 192.168.100.81  | 8080/2222 | StandBy     | 堡垒机 (使用独立MySQL和Redis) |
 | syncthing/relaysrv    | -                        | 192.168.100.81  | -         | StandBy     | Syncthing 中继 |
 | syncthing/discosrv    | -                        | 192.168.100.81  | -         | StandBy     | Syncthing 服务发现 |
