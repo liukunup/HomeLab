@@ -1,0 +1,30 @@
+version: '3'
+
+volumes:
+  db_data:
+
+services:
+  web:
+    image: ${WEB_IMAGE:-nginx:alpine}
+    container_name: ${WEB_CONTAINER_NAME:-my-web-app}
+    ports:
+      - "${HOST_PORT}:${CONTAINER_PORT}"
+    environment:
+      - APP_ENV=${APP_ENV:-development}
+      - DB_HOST=${DB_HOST:-db}
+    volumes:
+      - ${HOST_VOLUME:-./data}:/app/data
+    restart: ${RESTART_POLICY:-unless-stopped}
+    depends_on:
+      - db
+
+  db:
+    image: ${DB_IMAGE:-postgres:13}
+    container_name: ${DB_CONTAINER_NAME:-my-database}
+    environment:
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-password}
+      - POSTGRES_DB=${DB_NAME:-mydb}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    restart: ${RESTART_POLICY:-unless-stopped}

@@ -29,36 +29,38 @@ set -euo pipefail
 #         Override these variables by setting them in your environment        #
 ###############################################################################
 
+# MinIO
+MINIO_ROOT_USER="${MINIO_ROOT_USER:-"root"}"             # MinIO root user
+MINIO_ROOT_PASSWORD="${MINIO_ROOT_PASSWORD:-"changeit"}" # 
+MINIO_DOMAIN="${MINIO_DOMAIN:-"minio.example.net"}"      #
+MINIO_VOLUMES="${MINIO_VOLUMES:-"/data/minio"}"          #
+
 # Container configuration
-CONTAINER_NAME="${CONTAINER_NAME:-my-container}"  # Name of the Docker container
-REGISTRY="${REGISTRY:-docker.io}"                 # Docker registry
-IMAGE_NAME="${IMAGE_NAME:-my-image}"              # Docker image name
-IMAGE_TAG="${IMAGE_TAG:-latest}"                  # Docker image tag
+CONTAINER_NAME="${CONTAINER_NAME:-"minio"}"              # Name of the Docker container
+REGISTRY="${REGISTRY:-"docker.io"}"                      # Docker registry
+IMAGE_NAME="${IMAGE_NAME:-"minio/minio"}"                # Docker image name
+IMAGE_TAG="${IMAGE_TAG:-"RELEASE.2025-09-07T16-13-09Z"}" # Docker image tag
 
 # Network configuration
-PORTS="${PORTS:-}"                                # Port mappings (e.g., "8080:80 8443:443")
-NETWORK="${NETWORK:-}"                            # Container network name
-CONTAINER_HOSTNAME="${CONTAINER_HOSTNAME:-}"      # Container hostname
+PORTS="${PORTS:-"9000:9000 9001:9001 8021:8021 30000-40000:30000-40000"}" # Port mappings
+NETWORK="${NETWORK:-}"       # Docker network name
+C_HOSTNAME="${C_HOSTNAME:-}" # Container hostname
 
 # Volume configuration
-VOLUMES="${VOLUMES:-}"                            # Volume mappings (e.g., "./data:/app/data ./config:/app/config")
-DATA_DIR="${DATA_DIR:-./data}"                    # Default data directory
-CONFIG_DIR="${CONFIG_DIR:-./config}"              # Default config directory
+VOLUMES="${VOLUMES:-"./data:${MINIO_VOLUMES} ./config.env:/etc/config.env:ro"}" # Volume mappings
+DATA_DIR="${DATA_DIR:-"./data"}"                                                # Default data directory
 
 # SSL configuration
-SSL_ENABLED="${SSL_ENABLED:-false}"               # Enable SSL certificate generation
-CERTS_DIR="${CERTS_DIR:-./certs}"                 # SSL certificates directory
+SSL_ENABLED="${SSL_ENABLED:-true}" # Enable SSL certificate generation
+CERTS_DIR="${CERTS_DIR:-./certs}"  # SSL certificates directory
 SSL_SUBJECT="${SSL_SUBJECT:-/C=CN/ST=Beijing/L=Beijing/O=MyOrg/CN=localhost}"
 
 # Environment variables (comma-separated KEY=VALUE pairs)
-ENV_VARS="${ENV_VARS:-}"
+ENV_VARS="${ENV_VARS:-"MINIO_CONFIG_ENV_FILE='/etc/config.env'"}"
 
 # Container options
 RESTART_POLICY="${RESTART_POLICY:-unless-stopped}" # Docker restart policy
 EXTRA_OPTIONS="${EXTRA_OPTIONS:-}"                 # Extra Docker options
-
-# Container command
-COMMAND="${COMMAND:-}"                             # Docker command
 
 ###############################################################################
 #                             INTERNAL VARIABLES                              #
@@ -128,13 +130,17 @@ Options:
   --dry-run       Show what would be done without actually doing it
 
 Environment Variables:
-  CONTAINER_NAME    Name of the Docker container
-  IMAGE_NAME        Docker image name
-  IMAGE_TAG         Docker image tag
-  PORTS             Port mappings (space-separated)
-  VOLUMES           Volume mappings (space-separated)
-  ENV_VARS          Environment variables (comma-separated KEY=VALUE pairs)
-  SSL_ENABLED       Enable SSL (true/false)
+  MINIO_ROOT_USER     MinIO root username
+  MINIO_ROOT_PASSWORD MinIO root password
+  MINIO_DOMAIN        MinIO domain
+  MINIO_VOLUMES       MinIO mount volume
+  CONTAINER_NAME      Name of the Docker container
+  IMAGE_NAME          Docker image name
+  IMAGE_TAG           Docker image tag
+  PORTS               Port mappings (space-separated)
+  VOLUMES             Volume mappings (space-separated)
+  ENV_VARS            Environment variables (comma-separated KEY=VALUE pairs)
+  SSL_ENABLED         Enable SSL (true/false)
 
 Example:
   CONTAINER_NAME=myapp IMAGE_NAME=nginx IMAGE_TAG=alpine PORTS="8080:80" ${SCRIPT_NAME}
@@ -200,8 +206,8 @@ validate_configuration() {
 
 # Create necessary directories
 create_directories() {
-    local dirs=("${DATA_DIR}" "${CONFIG_DIR}")
-    
+    local dirs=("${DATA_DIR}")
+
     if [[ "${SSL_ENABLED}" == "true" ]]; then
         dirs+=("${CERTS_DIR}")
     fi
@@ -282,6 +288,20 @@ remove_existing_container() {
     fi
 }
 
+# Build MinIO config.env file
+build_config_env() {
+
+    cat << EOF > config.env
+MINIO_OPTS=' --address=":9000" --console-address=":9001" --ftp="address=:8021" --ftp="passive-port-range=30000-40000" --certs-dir="/opt/minio/certs" '
+MINIO_ROOT_USER='${MINIO_ROOT_USER}'
+MINIO_ROOT_PASSWORD='${MINIO_ROOT_PASSWORD}'
+MINIO_DOMAIN='${MINIO_DOMAIN}'
+MINIO_VOLUMES='${MINIO_VOLUMES}'
+EOF
+
+    success "MinIO config.env generated successfully"
+}
+
 # Build Docker run command
 build_docker_command() {
     local cmd="docker run -d --name=${CONTAINER_NAME}"
@@ -299,8 +319,8 @@ build_docker_command() {
     fi
 
     # Add hostname
-    if [[ -n "${CONTAINER_HOSTNAME}" ]]; then
-        cmd+=" --hostname=${CONTAINER_HOSTNAME}"
+    if [[ -n "${C_HOSTNAME}" ]]; then
+        cmd+=" --hostname=${C_HOSTNAME}"
     fi
 
     # Add volume mappings
@@ -320,9 +340,9 @@ build_docker_command() {
 
     # Add SSL volumes if enabled
     if [[ "${SSL_ENABLED}" == "true" ]]; then
-        cmd+=" -v ${CERTS_DIR}/ca.pem:/etc/ssl/certs/ca.pem:ro"
-        cmd+=" -v ${CERTS_DIR}/server.pem:/etc/ssl/certs/server.pem:ro"
-        cmd+=" -v ${CERTS_DIR}/server.key:/etc/ssl/private/server.key:ro"
+        cmd+=" -v ${CERTS_DIR}/ca.pem:/opt/minio/certs/CAs/ca.crt:ro"
+        cmd+=" -v ${CERTS_DIR}/server.pem:/opt/minio/certs/public.crt:ro"
+        cmd+=" -v ${CERTS_DIR}/server.key:/opt/minio/certs/private.key:ro"
     fi
 
     # Add restart policy
@@ -335,11 +355,6 @@ build_docker_command() {
 
     # Add image
     cmd+=" ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
-
-    # Add command
-    if [[ -n "${COMMAND}" ]]; then
-        cmd+=" ${COMMAND}"
-    fi
 
     echo "${cmd}"
 }
@@ -370,9 +385,9 @@ Image:         ${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
 Status:        $(if [[ "${DRY_RUN}" == "true" ]]; then echo "DRY RUN"; else echo "DEPLOYED"; fi)
 
 Network:
-  Ports:       ${PORTS:-None}
+  Ports:       ${EXTRA_PORTS:-None}
   Network:     ${NETWORK:-default}
-  Hostname:    ${CONTAINER_HOSTNAME:-auto}
+  Hostname:    ${C_HOSTNAME:-auto}
 
 Volumes:
   Data:        ${DATA_DIR}
@@ -415,6 +430,7 @@ main() {
     fi
 
     remove_existing_container
+    build_config_env
 
     local docker_cmd
     docker_cmd=$(build_docker_command)

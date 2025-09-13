@@ -30,18 +30,18 @@ set -euo pipefail
 ###############################################################################
 
 # Container configuration
-CONTAINER_NAME="${CONTAINER_NAME:-my-container}"  # Name of the Docker container
-REGISTRY="${REGISTRY:-docker.io}"                 # Docker registry
-IMAGE_NAME="${IMAGE_NAME:-my-image}"              # Docker image name
-IMAGE_TAG="${IMAGE_TAG:-latest}"                  # Docker image tag
+CONTAINER_NAME="${CONTAINER_NAME:-mysqld-exporter}" # Name of the Docker container
+REGISTRY="${REGISTRY:-docker.io}"                   # Docker registry
+IMAGE_NAME="${IMAGE_NAME:-prom/mysqld-exporter}"    # Docker image name
+IMAGE_TAG="${IMAGE_TAG:-latest}"                    # Docker image tag
 
 # Network configuration
-PORTS="${PORTS:-}"                                # Port mappings (e.g., "8080:80 8443:443")
+PORTS="${PORTS:-"9104:9104"}"                     # Port mappings (e.g., "8080:80 8443:443")
 NETWORK="${NETWORK:-}"                            # Container network name
 CONTAINER_HOSTNAME="${CONTAINER_HOSTNAME:-}"      # Container hostname
 
 # Volume configuration
-VOLUMES="${VOLUMES:-}"                            # Volume mappings (e.g., "./data:/app/data ./config:/app/config")
+VOLUMES="${VOLUMES:-"./my.cnf:/.my.cnf:ro"}"      # Volume mappings (e.g., "./data:/app/data ./config:/app/config")
 DATA_DIR="${DATA_DIR:-./data}"                    # Default data directory
 CONFIG_DIR="${CONFIG_DIR:-./config}"              # Default config directory
 
@@ -282,6 +282,26 @@ remove_existing_container() {
     fi
 }
 
+# Build my.cnf file
+build_my_cnf() {
+
+    cat << EOF > .my.cnf
+[client]
+host=localhost
+port=3306
+socket=/var/run/mysqld/mysqld.sock
+user=foo
+password=bar
+[client.server1]
+user = bar
+password = bar123
+EOF
+
+    chmod 600 my.cnf
+
+    success "The 'my.cnf' generated successfully"
+}
+
 # Build Docker run command
 build_docker_command() {
     local cmd="docker run -d --name=${CONTAINER_NAME}"
@@ -415,6 +435,7 @@ main() {
     fi
 
     remove_existing_container
+    build_my_cnf
 
     local docker_cmd
     docker_cmd=$(build_docker_command)
