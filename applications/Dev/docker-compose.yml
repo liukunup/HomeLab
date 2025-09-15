@@ -109,7 +109,7 @@ services:
       - ${ETCD_PEER_PORT:-2380}:2380
     environment:
       ETCD_ROOT_USER: ${ETCD_ROOT_USERNAME:-admin}
-      ETCD_ROOT_PASSWORD: ${ETCD_ROOT_PASSWORD:-changeit}
+      ETCD_ROOT_PASSWORD: ${ETCD_ROOT_PASSWORD:?root password is required}
       ETCD_ADVERTISE_CLIENT_URLS: http://etcd:2379
       ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
       ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
@@ -121,6 +121,7 @@ services:
       - all
       - kv # key-value store
       - etcd
+      - apisix # etcd is used by APISIX
     healthcheck:
       test: ["CMD", "etcdctl", "endpoint", "health", "--endpoint=http://localhost:2379"]
       interval: 30s
@@ -186,6 +187,8 @@ services:
       APISIX_API_KEY: ${APISIX_API_KEY:?api key is required}
       APISIX_DEPLOYMENT_ETCD_HOST: etcd
       APISIX_DEPLOYMENT_ETCD_PORT: 2379
+      APISIX_DEPLOYMENT_ETCD_USER: ${ETCD_ROOT_USERNAME:-admin}
+      APISIX_DEPLOYMENT_ETCD_PASSWORD: ${ETCD_ROOT_PASSWORD:?root password is required}
     volumes:
       - apisix-data:/usr/local/apisix
     depends_on:
@@ -221,7 +224,7 @@ services:
 
   # Jupyter Notebook - Python
   notebook-python:
-    image: quay.io/jupyter/minimal-notebook:notebook-7.4.5
+    image: ${REGISTRY_QUAY:-quay.io}/${NOTEBOOK_PYTHON_IMAGE:-jupyter/minimal-notebook:latest}
     container_name: notebook-python
     hostname: notebook-python
     command: start-notebook.sh --NotebookApp.password=${NOTEBOOK_PYTHON_PASSWORD:?password is required}
@@ -255,7 +258,7 @@ services:
     image: ${REGISTRY:-docker.io}/${NOTEBOOK_CPP_IMAGE:-datainpoint/xeus-cling-notebook:latest}
     container_name: notebook-cpp
     hostname: notebook-cpp
-    command: start-notebook.sh --NotebookApp.password=${NOTEBOOK_PYTHON_PASSWORD:?password is required}
+    command: start-notebook.sh --NotebookApp.password=${NOTEBOOK_CPP_PASSWORD:?password is required}
     restart: unless-stopped
     environment:
       TZ: ${TZ:-Asia/Shanghai}
