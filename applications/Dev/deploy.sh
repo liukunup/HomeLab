@@ -41,9 +41,9 @@ else
     cd "$PROJECT_DIR/$SUB_DIR"
 fi
 
-# Check docker-compose.yaml
-if [ ! -f "docker-compose.yaml" ]; then
-    echo -e "${RED}错误: 未找到 docker-compose.yaml${NC}"
+# Check docker-compose.yml
+if [ ! -f "docker-compose.yml" ]; then
+    echo -e "${RED}错误: 未找到 docker-compose.yml${NC}"
     exit 1
 fi
 

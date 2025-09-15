@@ -2,8 +2,8 @@
 
 networks:
   dev-stack:
-    driver: bridge
     name: ${NETWORK_NAME}
+    driver: bridge
 
 volumes:
   mysql-data:
@@ -186,13 +186,12 @@ services:
       - ${APISIX_METRICS_PORT:-9091}:9091
     environment:
       APISIX_API_KEY: ${APISIX_API_KEY:-edd1c9f034335f136f87ad84b625c8f1}
+      APISIX_DEPLOYMENT_ETCD_HOST: etcd
+      APISIX_DEPLOYMENT_ETCD_PORT: 2379
     volumes:
       - apisix-data:/usr/local/apisix/conf
     depends_on:
       - etcd
-    environment:
-      APISIX_DEPLOYMENT_ETCD_HOST: etcd
-      APISIX_DEPLOYMENT_ETCD_PORT: 2379
     networks:
       - dev-stack
     profiles:
