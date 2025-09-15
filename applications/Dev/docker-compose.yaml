@@ -2,6 +2,8 @@
 
 networks:
   dev-stack:
+    driver: bridge
+    name: ${NETWORK_NAME}
 
 volumes:
   mysql-data:
@@ -31,19 +33,29 @@ services:
       - mysql-data:/var/lib/mysql
     networks:
       - dev-stack
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # Redis
   redis:
     image: ${REGISTRY:-docker.io}/${REDIS_IMAGE:-redis:latest}
     container_name: redis
     restart: unless-stopped
-    command: redis-server --requirepass ${REDIS_PASSWORD}
+    command: redis-server --requirepass ${REDIS_PASSWORD:?password is required}
     ports:
       - ${REDIS_PORT:-6379}:6379
     volumes:
       - redis-data:/data
     networks:
       - dev-stack
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$$REDIS_PASSWORD", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # MinIO
   minio:
@@ -52,15 +64,20 @@ services:
     restart: unless-stopped
     command: server /data --console-address ":9001"
     ports:
-      - "${MINIO_API_PORT:-9000}:9000"
-      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+      - ${MINIO_API_PORT:-9000}:9000
+      - ${MINIO_CONSOLE_PORT:-9001}:9001
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USERNAME}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USERNAME:-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?password is required}
     volumes:
       - minio-data:/data
     networks:
       - dev-stack
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # etcd
   etcd:
@@ -82,6 +99,11 @@ services:
       - etcd-data:/etcd-data
     networks:
       - dev-stack
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health", "--endpoint=http://localhost:2379"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # ZooKeeper
   zookeeper:
@@ -93,6 +115,8 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper-data:/data
     networks:
       - dev-stack
 
