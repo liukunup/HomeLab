@@ -1,0 +1,139 @@
+# Dev Stack
+
+networks:
+  dev-stack:
+
+volumes:
+  mysql-data:
+  redis-data:
+  minio-data:
+  etcd-data:
+  kafka-data:
+  zookeeper-data:
+  apisix-data:
+
+services:
+
+  # MySQL
+  mysql:
+    image: ${REGISTRY:-docker.io}/${MYSQL_IMAGE:-mysql:latest}
+    container_name: mysql
+    restart: unless-stopped
+    ports:
+      - ${MYSQL_PORT:-3306}:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?root password is required}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-testing}
+      MYSQL_USER: ${MYSQL_USER:-testing}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?password is required}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - dev-stack
+
+  # Redis
+  redis:
+    image: ${REGISTRY:-docker.io}/${REDIS_IMAGE:-redis:latest}
+    container_name: redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - ${REDIS_PORT:-6379}:6379
+    volumes:
+      - redis-data:/data
+    networks:
+      - dev-stack
+
+  # MinIO
+  minio:
+    image: ${REGISTRY:-docker.io}/${MINIO_IMAGE:-minio/minio:latest}
+    container_name: minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USERNAME}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio-data:/data
+    networks:
+      - dev-stack
+
+  # etcd
+  etcd:
+    image: ${REGISTRY:-docker.io}/${ETCD_IMAGE:-etcd:3.5}
+    container_name: etcd
+    restart: unless-stopped
+    ports:
+      - ${ETCD_CLIENT_PORT:-2379}:2379
+      - ${ETCD_PEER_PORT:-2380}:2380
+    environment:
+      ETCD_ADVERTISE_CLIENT_URLS: "http://etcd:2379"
+      ETCD_LISTEN_CLIENT_URLS: "http://0.0.0.0:2379"
+      ETCD_LISTEN_PEER_URLS: "http://0.0.0.0:2380"
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: "http://etcd:2380"
+      ETCD_INITIAL_CLUSTER: "etcd=http://etcd:2380"
+      ETCD_INITIAL_CLUSTER_TOKEN: "etcd-cluster"
+      ETCD_INITIAL_CLUSTER_STATE: "new"
+    volumes:
+      - etcd-data:/etcd-data
+    networks:
+      - dev-stack
+
+  # ZooKeeper
+  zookeeper:
+    image: ${REGISTRY:-docker.io}/${ZOOKEEPER_IMAGE:-zookeeper:3.9.4}
+    container_name: zookeeper
+    restart: unless-stopped
+    ports:
+      - ${ZOOKEEPER_PORT:-2181}:2181
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - dev-stack
+
+  # Kafka
+  kafka:
+    image: ${REGISTRY:-docker.io}/${KAFKA_IMAGE:-kafka:3.9.1}
+    container_name: kafka
+    restart: unless-stopped
+    ports:
+      - ${KAFKA_PORT:-9092}:9092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    depends_on:
+      - zookeeper
+    networks:
+      - dev-stack
+
+  # apisix
+  apisix:
+    image: ${REGISTRY:-docker.io}/${APISIX_IMAGE:-apache/apisix:3.13.0-debian}
+    container_name: apisix
+    restart: unless-stopped
+    ports:
+      - ${APISIX_GATEWAY_PORT:-9080}:9080
+      - ${APISIX_ADMIN_PORT:-9180}:9180
+      - ${APISIX_PROXY_PORT:-9443}:9443
+      - ${APISIX_METRICS_PORT:-9091}:9091
+    environment:
+      APISIX_API_KEY: ${APISIX_API_KEY:-edd1c9f034335f136f87ad84b625c8f1}
+    volumes:
+      - apisix-data:/usr/local/apisix/conf
+    depends_on:
+      - etcd
+    environment:
+      APISIX_DEPLOYMENT_ETCD_HOST: etcd
+      APISIX_DEPLOYMENT_ETCD_PORT: 2379
+    networks:
+      - dev-stack
