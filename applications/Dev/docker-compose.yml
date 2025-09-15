@@ -177,16 +177,17 @@ services:
     container_name: apisix
     restart: unless-stopped
     ports:
-      - ${APISIX_GATEWAY_PORT:-9080}:9080
-      - ${APISIX_ADMIN_PORT:-9180}:9180
-      - ${APISIX_PROXY_PORT:-9443}:9443
-      - ${APISIX_METRICS_PORT:-9091}:9091
+      - ${APISIX_HTTP_PORT:-9080}:9080     # HTTP
+      - ${APISIX_HTTPS_PORT:-9443}:9443    # HTTPS
+      - ${APISIX_CONTROL_PORT:-9090}:9090  # Control Plane
+      - ${APISIX_METRICS_PORT:-9091}:9091  # Prometheus metrics
+      - ${APISIX_ADMIN_PORT:-9180}:9180    # Admin API
     environment:
-      APISIX_API_KEY: ${APISIX_API_KEY:-edd1c9f034335f136f87ad84b625c8f1}
+      APISIX_API_KEY: ${APISIX_API_KEY:?api key is required}
       APISIX_DEPLOYMENT_ETCD_HOST: etcd
       APISIX_DEPLOYMENT_ETCD_PORT: 2379
     volumes:
-      - apisix-data:/usr/local/apisix/conf
+      - apisix-data:/usr/local/apisix
     depends_on:
       - etcd
     networks:
