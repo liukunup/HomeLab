@@ -42,7 +42,7 @@ docker run -d \
   --ipc=host \
   --restart=unless-stopped \
   --name=gpustack \
-  gpustack/gpustack:v0.5.1
+  gpustack/gpustack:v0.7.1
 ```
 
 如何获取密码?
