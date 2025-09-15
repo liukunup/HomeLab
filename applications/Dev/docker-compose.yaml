@@ -33,6 +33,11 @@ services:
       - mysql-data:/var/lib/mysql
     networks:
       - dev-stack
+    profiles:
+      - all
+      - base
+      - database
+      - mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
       interval: 30s
@@ -51,6 +56,11 @@ services:
       - redis-data:/data
     networks:
       - dev-stack
+    profiles:
+      - all
+      - base
+      - cache
+      - redis
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "$$REDIS_PASSWORD", "ping"]
       interval: 30s
@@ -73,6 +83,11 @@ services:
       - minio-data:/data
     networks:
       - dev-stack
+    profiles:
+      - all
+      - base
+      - storage
+      - minio
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
@@ -99,6 +114,11 @@ services:
       - etcd-data:/etcd-data
     networks:
       - dev-stack
+    profiles:
+      - all
+      - base
+      - kv # key-value store
+      - etcd
     healthcheck:
       test: ["CMD", "etcdctl", "endpoint", "health", "--endpoint=http://localhost:2379"]
       interval: 30s
@@ -119,6 +139,10 @@ services:
       - zookeeper-data:/data
     networks:
       - dev-stack
+    profiles:
+      - all
+      - mq
+      - zookeeper
 
   # Kafka
   kafka:
@@ -140,6 +164,10 @@ services:
       - zookeeper
     networks:
       - dev-stack
+    profiles:
+      - all
+      - mq
+      - kafka
 
   # apisix
   apisix:
@@ -162,6 +190,11 @@ services:
       APISIX_DEPLOYMENT_ETCD_PORT: 2379
     networks:
       - dev-stack
+    profiles:
+      - all
+      - api-gateway
+      - gateway
+      - apisix
 
   # code-server
   # https://github.com/coder/code-server
@@ -178,3 +211,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - dev-stack
+    profiles:
+      - all
+      - ide
+      - code-server
+      - vscode

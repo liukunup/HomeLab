@@ -81,8 +81,8 @@ fi
 
 # Start services
 echo -e "${BLUE}🐳 启动服务中...${NC}"
-docker-compose pull
-docker-compose up -d
+docker-compose --profile all pull
+docker-compose --profile all up -d
 
 # Wait for services to initialize
 echo -e "${BLUE}⏳ 等待服务启动...${NC}"
