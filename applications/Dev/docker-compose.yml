@@ -101,27 +101,24 @@ services:
 
   # etcd
   etcd:
-    image: ${REGISTRY:-docker.io}/${ETCD_IMAGE:-etcd:3.5}
+    image: ${REGISTRY:-docker.io}/${ETCD_IMAGE:-bitnami/etcd:latest}
     container_name: etcd
     restart: unless-stopped
     ports:
       - ${ETCD_CLIENT_PORT:-2379}:2379
       - ${ETCD_PEER_PORT:-2380}:2380
     environment:
-      ETCD_ADVERTISE_CLIENT_URLS: "http://etcd:2379"
-      ETCD_LISTEN_CLIENT_URLS: "http://0.0.0.0:2379"
-      ETCD_LISTEN_PEER_URLS: "http://0.0.0.0:2380"
-      ETCD_INITIAL_ADVERTISE_PEER_URLS: "http://etcd:2380"
-      ETCD_INITIAL_CLUSTER: "etcd=http://etcd:2380"
-      ETCD_INITIAL_CLUSTER_TOKEN: "etcd-cluster"
-      ETCD_INITIAL_CLUSTER_STATE: "new"
+      ETCD_ROOT_USER: ${ETCD_ROOT_USERNAME:-admin}
+      ETCD_ROOT_PASSWORD: ${ETCD_ROOT_PASSWORD:-changeit}
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd:2379
+      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+      ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
     volumes:
-      - etcd-data:/etcd-data
+      - etcd-data:/bitnami/etcd/data
     networks:
       - dev-stack
     profiles:
       - all
-      - base
       - kv # key-value store
       - etcd
     healthcheck:
