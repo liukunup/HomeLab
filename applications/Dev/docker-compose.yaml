@@ -14,6 +14,11 @@ volumes:
   zookeeper-data:
   apisix-data:
   code-server-config:
+  notebook-python-data:
+  notebook-cpp-data:
+  notebook-sql-data:
+  nginx-data:
+  grafana-data:
 
 services:
 
@@ -216,3 +221,144 @@ services:
       - ide
       - code-server
       - vscode
+
+  # Jupyter Notebook - Python
+  notebook-python:
+    image: quay.io/jupyter/minimal-notebook:notebook-7.4.5
+    container_name: notebook-python
+    hostname: notebook-python
+    command: start-notebook.sh --NotebookApp.password=${NOTEBOOK_PYTHON_PASSWORD:?password is required}
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      LANG: ${LANG:-en_US.UTF-8}
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      DOCKER_STACKS_JUPYTER_CMD: lab
+      JUPYTER_ENABLE_LAB: yes
+      GRANT_SUDO: yes
+    volumes:
+      - notebook-python-data:/home/jovyan/work
+    ports:
+      - ${NOTEBOOK_PYTHON_PORT:-8888}:8888
+    networks:
+      - dev-stack
+    profiles:
+      - all
+      - notebook
+      - python
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/lab"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # C++
+  notebook-cpp:
+    image: ${REGISTRY:-docker.io}/${NOTEBOOK_CPP_IMAGE:-datainpoint/xeus-cling-notebook:latest}
+    container_name: notebook-cpp
+    hostname: notebook-cpp
+    command: start-notebook.sh --NotebookApp.password=${NOTEBOOK_PYTHON_PASSWORD:?password is required}
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      LANG: ${LANG:-en_US.UTF-8}
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      DOCKER_STACKS_JUPYTER_CMD: lab
+      JUPYTER_ENABLE_LAB: yes
+      GRANT_SUDO: yes
+    volumes:
+      - notebook-cpp-data:/home/jovyan/work
+    ports:
+      - ${NOTEBOOK_CPP_PORT:-8889}:8888
+    networks:
+      - dev-stack
+    profiles:
+      - all
+      - notebook
+      - cpp
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/lab"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # SQL
+  notebook-sql:
+    image: ${REGISTRY:-docker.io}/${NOTEBOOK_SQL_IMAGE:-datainpoint/xeus-sql-notebook:latest}
+    container_name: notebook-sql
+    hostname: notebook-sql
+    command: start-notebook.sh --NotebookApp.password=${NOTEBOOK_SQL_PASSWORD:?password is required}
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      LANG: ${LANG:-en_US.UTF-8}
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      DOCKER_STACKS_JUPYTER_CMD: lab
+      JUPYTER_ENABLE_LAB: yes
+      GRANT_SUDO: yes
+    volumes:
+      - notebook-sql-data:/home/jovyan/work
+    ports:
+      - ${NOTEBOOK_SQL_PORT:-8890}:8888
+    networks:
+      - dev-stack
+    profiles:
+      - all
+      - notebook
+      - sql
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/lab"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx
+  nginx:
+    image: ${REGISTRY:-docker.io}/${NGINX_IMAGE:-nginx:latest}
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - ${NGINX_HTTP_PORT:-80}:80
+      - ${NGINX_HTTPS_PORT:-443}:443
+    volumes:
+      - nginx-data:/etc/nginx
+    networks:
+      - dev-stack
+    profiles:
+      - all
+      - web
+      - nginx
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Grafana
+  grafana:
+    image: ${REGISTRY:-docker.io}/${GRAFANA_IMAGE:-grafana/grafana:latest}
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - ${GRAFANA_PORT:-3000}:3000
+    environment:
+      - TZ=Asia/Shanghai
+      - LANG=en_US.UTF-8
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-changeit}
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - dev-stack
+    profiles:
+      - all
+      - monitoring
+      - grafana
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/robots.txt"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
