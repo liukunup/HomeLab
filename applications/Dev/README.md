@@ -8,13 +8,7 @@
 TL;DR;
 
 ```shell
-curl -fsSL https://raw.githubusercontent.com/your-username/your-repo/main/deploy.sh | sh
-```
-
-```shell
-curl -fsSL https://raw.githubusercontent.com/your-username/your-repo/main/deploy.sh -o deploy.sh
-chmod +x deploy.sh
-./deploy.sh
+curl -fsSL https://raw.githubusercontent.com/liukunup/HomeLab/refs/heads/main/applications/Dev/deploy.sh | sh
 ```
 
 ## 服务清单
@@ -23,5 +17,6 @@ chmod +x deploy.sh
 - Redis
 - MinIO
 - etcd
-- ZookKeeper & Kafka
+- Zookeeper & Kafka
 - APISIX
+- Code Server
