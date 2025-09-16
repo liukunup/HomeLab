@@ -365,3 +365,35 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+  # InfluxDB
+  influxdb:
+    image: ${REGISTRY:-docker.io}/${INFLUXDB_IMAGE:-influxdb:2.7}
+    container_name: influxdb
+    restart: unless-stopped
+    ports:
+      - ${INFLUXDB_HTTP_PORT:-8086}:8086
+    environment:
+      - TZ=Asia/Shanghai
+      - LANG=en_US.UTF-8
+      - DOCKER_INFLUXDB_INIT_MODE=${INFLUXDB_INIT_MODE:-setup}
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_ADMIN_USER:-admin}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_ADMIN_PASSWORD:-changeit}
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG:-myorg}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET:-mybucket}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_TOKEN:-my-super-secret-auth-token}
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+      - influxdb-config:/etc/influxdb2
+    networks:
+      - dev-stack
+    profiles:
+      - all
+      - database
+      - monitoring
+      - influxdb
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8086/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
