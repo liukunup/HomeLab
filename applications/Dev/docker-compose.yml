@@ -101,20 +101,23 @@ services:
 
   # etcd
   etcd:
-    image: ${REGISTRY:-docker.io}/${ETCD_IMAGE:-bitnami/etcd:latest}
+    image: ${REGISTRY_QUAY:-quay.io}/${ETCD_IMAGE:-coreos/etcd:latest}
     container_name: etcd
     restart: unless-stopped
+    command:
+      - /usr/local/bin/etcd
+      - --data-dir /etcd-data
+      - --name etcd-single-node
+      - --initial-advertise-peer-urls http://etcd:2380
+      - --listen-client-urls http://0.0.0.0:2379
+      - --listen-peer-urls http://0.0.0.0:2380
+      - --advertise-client-urls http://etcd:2379
+      - --initial-cluster etcd-single-node=http://etcd:2380
     ports:
       - ${ETCD_CLIENT_PORT:-2379}:2379
       - ${ETCD_PEER_PORT:-2380}:2380
-    environment:
-      ETCD_ROOT_USER: ${ETCD_ROOT_USERNAME:-admin}
-      ETCD_ROOT_PASSWORD: ${ETCD_ROOT_PASSWORD:?root password is required}
-      ETCD_ADVERTISE_CLIENT_URLS: http://etcd:2379
-      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
-      ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
     volumes:
-      - etcd-data:/bitnami/etcd/data
+      - etcd-data:/etcd-data
     networks:
       - dev-stack
     profiles:
@@ -123,7 +126,7 @@ services:
       - etcd
       - apisix # etcd is used by APISIX
     healthcheck:
-      test: ["CMD", "etcdctl", "endpoint", "health", "--endpoint=http://localhost:2379"]
+      test: ["CMD", "curl", "-k", "http://localhost:2379/livez"]
       interval: 30s
       timeout: 10s
       retries: 3
