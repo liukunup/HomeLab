@@ -210,7 +210,6 @@ services:
 
   # code-server
   # https://github.com/coder/code-server
-  # Run VS Code on any machine anywhere and access it in the browser.
   code-server:
     image: ${REGISTRY:-docker.io}/${CODE_SERVER_IMAGE:-codercom/code-server:latest}
     container_name: code-server
@@ -323,6 +322,7 @@ services:
       retries: 3
 
   # Nginx
+  # https://nginx.org/en/docs/
   nginx:
     image: ${REGISTRY:-docker.io}/${NGINX_IMAGE:-nginx:latest}
     container_name: nginx
@@ -345,6 +345,7 @@ services:
       retries: 3
 
   # Grafana
+  # https://grafana.com/docs/grafana/latest/setup-grafana/configure-grafana/
   grafana:
     image: ${REGISTRY:-docker.io}/${GRAFANA_IMAGE:-grafana/grafana:latest}
     container_name: grafana
@@ -371,6 +372,7 @@ services:
       retries: 3
 
   # InfluxDB
+  # https://docs.influxdata.com/influxdb/v2/get-started/
   influxdb:
     image: ${REGISTRY:-docker.io}/${INFLUXDB_IMAGE:-influxdb:2.7}
     container_name: influxdb
@@ -402,7 +404,8 @@ services:
       timeout: 10s
       retries: 3
 
-  # ClickHouse (单机版)
+  # ClickHouse
+  # https://clickhouse.com/docs/zh/install/docker
   clickhouse:
     image: ${REGISTRY:-docker.io}/${CLICKHOUSE_IMAGE:-clickhouse/clickhouse-server:latest}
     container_name: clickhouse
