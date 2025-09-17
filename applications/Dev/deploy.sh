@@ -90,21 +90,21 @@ generate_random_password() {
 # usage: generate_argon2_password "your_password"
 generate_argon2_password() {
     local password=${1:-"123456"}
-    docker run --rm python:3.9-slim python3 -c "
+    python3 -c "
 from argon2 import PasswordHasher
 ph = PasswordHasher(time_cost=10, memory_cost=10240, parallelism=8)
-print(ph.hash('$password'))
+print(ph.hash('${password}'))
 " 2>/dev/null
 }
 
 # ----- Main -----
 echo -e "${BLUE}🚀 开始一键部署...${NC}"
 
-echo -e "${BLUE}🔍 1.检查依赖...${NC}"
+echo -e "${BLUE}🔍 检查依赖...${NC}"
 
 check_dependencies
 
-echo -e "${BLUE}📁 2.拉取配置文件...${NC}"
+echo -e "${BLUE}📁 拉取配置文件...${NC}"
 
 [ -d "$PROJECT_DIR" ] || mkdir -p "$PROJECT_DIR"
 
@@ -118,7 +118,7 @@ if [ ! -f "$PROJECT_DIR/docker-compose.yml" ]; then
     curl -O "${DOWNLOAD_URL_PREFIX}/docker-compose.yml"
 fi
 
-echo -e "${BLUE}🛠️ 3.配置环境变量...${NC}"
+echo -e "${BLUE}🛠️ 配置环境变量...${NC}"
 
 if [ -f ".env.example" ] && [ ! -f ".env" ]; then
     echo -e "${BLUE}📝 创建配置文件...${NC}"
@@ -165,19 +165,21 @@ if [ -f ".env.example" ] && [ ! -f ".env" ]; then
     done
 
     # 生成 Argon2 加密的密码并填充 .env 中的变量
-    argon2_fields=(
-        "NOTEBOOK_PYTHON_PASSWORD"
-        "NOTEBOOK_CPP_PASSWORD"
-        "NOTEBOOK_SQL_PASSWORD"
-    )
-    for field in "${argon2_fields[@]}"; do
-        if grep -q "${field}=" .env; then
-            rand_password=$(generate_random_password 8 "lud")
-            argon2_password=$(generate_argon2_password "${rand_password}")
-            sed -i "s/${field}=.*/${field}='${argon2_password}'/" .env
-            echo -e "${GREEN}✅ 已生成随机密码 for ${field}${NC}"
-        fi
-    done
+    if command -v python3 >/dev/null 2>&1; then
+        argon2_fields=(
+            "NOTEBOOK_PYTHON_PASSWORD"
+            "NOTEBOOK_CPP_PASSWORD"
+            "NOTEBOOK_SQL_PASSWORD"
+        )
+        for field in "${argon2_fields[@]}"; do
+            if grep -q "${field}=" .env; then
+                rand_password=$(generate_random_password 8 "lud")
+                argon2_password=$(generate_argon2_password "${rand_password}")
+                sed -i "s|${field}=.*|${field}='${argon2_password}' # ${rand_password}|" .env
+                echo -e "${GREEN}✅ 已生成随机密码 for ${field}${NC}"
+            fi
+        done
+    fi
 
     echo -e "${YELLOW}⚠️  请检查 .env 文件中的配置，然后重新运行部署${NC}"
     echo -e "${YELLOW}   或者直接继续部署（使用默认生成的密码）${NC}"
@@ -193,22 +195,22 @@ else
     exit 1
 fi
 
-# # Start services
-# echo -e "${BLUE}🐳 启动服务中...${NC}"
-# docker-compose --profile all pull
-# docker-compose --profile all up -d
+# Start services
+echo -e "${BLUE}🐳 启动服务中...${NC}"
+docker-compose --profile all pull
+docker-compose --profile all up -d
 
-# # Wait for services to initialize
-# echo -e "${BLUE}⏳ 等待服务启动...${NC}"
-# sleep 15
+# Wait for services to initialize
+echo -e "${BLUE}⏳ 等待服务启动...${NC}"
+sleep 15
 
-# # Check status
-# echo -e "${BLUE}🔍 检查服务状态...${NC}"
-# if docker-compose ps | grep -q "Exit"; then
-#     echo -e "${YELLOW}⚠️  有些服务可能启动异常，请查看日志: docker-compose logs${NC}"
-# else
-#     echo -e "${GREEN}✅ 所有服务启动成功！${NC}"
-# fi
+# Check status
+echo -e "${BLUE}🔍 检查服务状态...${NC}"
+if docker-compose ps | grep -q "Exit"; then
+    echo -e "${YELLOW}⚠️  有些服务可能启动异常，请查看日志: docker-compose logs${NC}"
+else
+    echo -e "${GREEN}✅ 所有服务启动成功！${NC}"
+fi
 
 # Summary
 echo -e "\n${GREEN}🌈 部署完成！${NC}"
