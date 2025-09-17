@@ -55,6 +55,7 @@ services:
       retries: 3
 
   # Redis
+  # https://redis.io/docs/latest/operate/oss_and_stack/
   redis:
     image: ${REGISTRY:-docker.io}/${REDIS_IMAGE:-redis:latest}
     container_name: redis
