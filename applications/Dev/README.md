@@ -11,6 +11,10 @@ TL;DR;
 curl -fsSL https://raw.githubusercontent.com/liukunup/HomeLab/refs/heads/main/applications/Dev/deploy.sh | sh
 ```
 
+```powershell
+irm https://raw.githubusercontent.com/liukunup/HomeLab/refs/heads/main/applications/Dev/deploy.ps1 | iex
+```
+
 ## 服务清单
 
 - MySQL
