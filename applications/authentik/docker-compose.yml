@@ -6,6 +6,7 @@ networks:
     external: true
 
 services:
+
   server:
     command: server
     env_file:
@@ -30,6 +31,7 @@ services:
     - ./custom-templates:/templates
     networks:
     - 1panel-network
+
   worker:
     command: worker
     env_file:
@@ -54,3 +56,23 @@ services:
     - ./custom-templates:/templates
     networks:
     - 1panel-network
+
+  # ak-outpost-ldap:
+  #   image: ${AUTHENTIK_IMAGE:-ghcr.io/goauthentik/ldap}:${AUTHENTIK_TAG:-2025.8.1}
+  #   env_file:
+  #   - .env
+  #   environment:
+  #     AUTHENTIK_HOST: http://standby.homelab.lan:9000/
+  #     AUTHENTIK_TOKEN:
+  #     AUTHENTIK_INSECURE: false
+  #     AUTHENTIK_HOST_BROWSER:
+  #     SSL_CERT_DIR: /etc/ssl/certs
+  #     GOFIPS: "1"
+  #   ports:
+  #   - "389:3389/tcp"
+  #   - "636:6636/tcp"
+  #   restart: unless-stopped
+  #   networks:
+  #   - 1panel-network
+  #   depends_on:
+  #   - server
