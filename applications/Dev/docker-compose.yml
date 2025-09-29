@@ -63,7 +63,9 @@ services:
     ports:
       - ${PMA_PORT:-80}:80
     environment:
-      PMA_ARBITRARY: 1
+      PMA_ARBITRARY: ${PMA_ARBITRARY:-1}
+      PMA_HOST: mysql
+      PMA_PORT: ${MYSQL_PORT:-3306}:3306
     networks:
       - dev-stack
     depends_on:
@@ -108,7 +110,10 @@ services:
     ports:
     - ${REDIS_COMMANDER_PORT:-8081}:8081
     environment:
-      REDIS_HOSTS: local:redis:6379
+      HTTP_USER: ${REDIS_COMMANDER_HTTP_USERNAME:-admin}
+      HTTP_PASSWORD: ${REDIS_COMMANDER_HTTP_PASSWORD:?redis commander password is required}
+      REDIS_HOST: redis
+      REDIS_PORT: ${REDIS_PORT:-6379}:6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:?redis password is required}
     networks:
       - dev-stack
